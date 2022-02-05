@@ -876,9 +876,14 @@ infrastructure metrics in the Compute Optimizer User Guide.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"enhancedInfrastructureMetrics"`: The status of the enhanced infrastructure metrics
-  recommendation preference to create or update. A status of Active confirms that the
-  preference is applied in the latest recommendation refresh, and a status of Inactive
-  confirms that it's not yet applied.
+  recommendation preference to create or update. Specify the Active status to activate the
+  preference, or specify Inactive to deactivate the preference. For more information, see
+  Enhanced infrastructure metrics in the Compute Optimizer User Guide.
+- `"inferredWorkloadTypes"`: The status of the inferred workload types recommendation
+  preference to create or update.  The inferred workload type feature is active by default.
+  To deactivate it, create a recommendation preference.  Specify the Inactive status to
+  deactivate the feature, or specify Active to activate it. For more information, see
+  Inferred workload types in the Compute Optimizer User Guide.
 - `"scope"`: An object that describes the scope of the recommendation preference to create.
   You can create recommendation preferences at the organization level (for management
   accounts of an organization only), account level, and resource level. For more information,
@@ -887,7 +892,10 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   account levels. You can create recommendation preferences for Auto Scaling groups only at
   the resource level by specifying a scope name of ResourceArn and a scope value of the Auto
   Scaling group Amazon Resource Name (ARN). This will configure the preference for all
-  instances that are part of the specified the Auto Scaling group.
+  instances that are part of the specified Auto Scaling group. You also cannot create
+  recommendation preferences at the resource level for instances that are part of an Auto
+  Scaling group. You can create recommendation preferences at the resource level only for
+  standalone instances.
 """
 function put_recommendation_preferences(
     resourceType; aws_config::AbstractAWSConfig=global_aws_config()

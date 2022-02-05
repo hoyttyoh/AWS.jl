@@ -192,6 +192,51 @@ function copy_workspace_image(
 end
 
 """
+    create_connect_client_add_in(name, resource_id, url)
+    create_connect_client_add_in(name, resource_id, url, params::Dict{String,<:Any})
+
+Creates a client-add-in for Amazon Connect within a directory. You can create only one
+Amazon Connect client add-in within a directory. This client add-in allows WorkSpaces users
+to seamlessly connect to Amazon Connect.
+
+# Arguments
+- `name`: The name of the client add-in.
+- `resource_id`: The directory identifier for which to configure the client add-in.
+- `url`: The endpoint URL of the Amazon Connect client add-in.
+
+"""
+function create_connect_client_add_in(
+    Name, ResourceId, URL; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return workspaces(
+        "CreateConnectClientAddIn",
+        Dict{String,Any}("Name" => Name, "ResourceId" => ResourceId, "URL" => URL);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function create_connect_client_add_in(
+    Name,
+    ResourceId,
+    URL,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return workspaces(
+        "CreateConnectClientAddIn",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}("Name" => Name, "ResourceId" => ResourceId, "URL" => URL),
+                params,
+            ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     create_connection_alias(connection_string)
     create_connection_alias(connection_string, params::Dict{String,<:Any})
 
@@ -481,6 +526,47 @@ function create_workspaces(
         "CreateWorkspaces",
         Dict{String,Any}(
             mergewith(_merge, Dict{String,Any}("Workspaces" => Workspaces), params)
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    delete_connect_client_add_in(add_in_id, resource_id)
+    delete_connect_client_add_in(add_in_id, resource_id, params::Dict{String,<:Any})
+
+Deletes a client-add-in for Amazon Connect that is configured within a directory.
+
+# Arguments
+- `add_in_id`: The identifier of the client add-in to delete.
+- `resource_id`: The directory identifier for which the client add-in is configured.
+
+"""
+function delete_connect_client_add_in(
+    AddInId, ResourceId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return workspaces(
+        "DeleteConnectClientAddIn",
+        Dict{String,Any}("AddInId" => AddInId, "ResourceId" => ResourceId);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function delete_connect_client_add_in(
+    AddInId,
+    ResourceId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return workspaces(
+        "DeleteConnectClientAddIn",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}("AddInId" => AddInId, "ResourceId" => ResourceId),
+                params,
+            ),
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -779,6 +865,46 @@ function describe_client_properties(
         "DescribeClientProperties",
         Dict{String,Any}(
             mergewith(_merge, Dict{String,Any}("ResourceIds" => ResourceIds), params)
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    describe_connect_client_add_ins(resource_id)
+    describe_connect_client_add_ins(resource_id, params::Dict{String,<:Any})
+
+Retrieves a list of Amazon Connect client add-ins that have been created.
+
+# Arguments
+- `resource_id`: The directory identifier for which the client add-in is configured.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"MaxResults"`: The maximum number of items to return.
+- `"NextToken"`: If you received a NextToken from a previous call that was paginated,
+  provide this token to receive the next set of results.
+"""
+function describe_connect_client_add_ins(
+    ResourceId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return workspaces(
+        "DescribeConnectClientAddIns",
+        Dict{String,Any}("ResourceId" => ResourceId);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function describe_connect_client_add_ins(
+    ResourceId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return workspaces(
+        "DescribeConnectClientAddIns",
+        Dict{String,Any}(
+            mergewith(_merge, Dict{String,Any}("ResourceId" => ResourceId), params)
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -2077,6 +2203,52 @@ function terminate_workspaces(
                 Dict{String,Any}(
                     "TerminateWorkspaceRequests" => TerminateWorkspaceRequests
                 ),
+                params,
+            ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    update_connect_client_add_in(add_in_id, resource_id)
+    update_connect_client_add_in(add_in_id, resource_id, params::Dict{String,<:Any})
+
+Updates a Amazon Connect client add-in. Use this action to update the name and endpoint URL
+of a Amazon Connect client add-in.
+
+# Arguments
+- `add_in_id`: The identifier of the client add-in to update.
+- `resource_id`: The directory identifier for which the client add-in is configured.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"Name"`: The name of the client add-in.
+- `"URL"`: The endpoint URL of the Amazon Connect client add-in.
+"""
+function update_connect_client_add_in(
+    AddInId, ResourceId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return workspaces(
+        "UpdateConnectClientAddIn",
+        Dict{String,Any}("AddInId" => AddInId, "ResourceId" => ResourceId);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function update_connect_client_add_in(
+    AddInId,
+    ResourceId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return workspaces(
+        "UpdateConnectClientAddIn",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}("AddInId" => AddInId, "ResourceId" => ResourceId),
                 params,
             ),
         );

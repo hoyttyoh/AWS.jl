@@ -82,6 +82,49 @@ function associate_bot(
 end
 
 """
+    associate_default_vocabulary(instance_id, language_code)
+    associate_default_vocabulary(instance_id, language_code, params::Dict{String,<:Any})
+
+Associates an existing vocabulary as the default. Contact Lens for Amazon Connect uses the
+vocabulary in post-call and real-time analysis sessions for the given language.
+
+# Arguments
+- `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
+  in the ARN of the instance.
+- `language_code`: The language code of the vocabulary entries. For a list of languages and
+  their corresponding language codes, see What is Amazon Transcribe?
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"VocabularyId"`: The identifier of the custom vocabulary. If this is empty, the default
+  is set to none.
+"""
+function associate_default_vocabulary(
+    InstanceId, LanguageCode; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return connect(
+        "PUT",
+        "/default-vocabulary/$(InstanceId)/$(LanguageCode)";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function associate_default_vocabulary(
+    InstanceId,
+    LanguageCode,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connect(
+        "PUT",
+        "/default-vocabulary/$(InstanceId)/$(LanguageCode)",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     associate_instance_storage_config(instance_id, resource_type, storage_config)
     associate_instance_storage_config(instance_id, resource_type, storage_config, params::Dict{String,<:Any})
 
@@ -633,7 +676,7 @@ end
     create_integration_association(instance_id, integration_arn, integration_type)
     create_integration_association(instance_id, integration_arn, integration_type, params::Dict{String,<:Any})
 
-Creates an AWS resource association with an Amazon Connect instance.
+Creates an Amazon Web Services resource association with an Amazon Connect instance.
 
 # Arguments
 - `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
@@ -1069,6 +1112,7 @@ Creates a new user hierarchy group.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"ParentGroupId"`: The identifier for the parent hierarchy group. The user hierarchy is
   created at level one if the parent group ID is null.
+- `"Tags"`: The tags used to organize, track, or control access for this resource.
 """
 function create_user_hierarchy_group(
     InstanceId, Name; aws_config::AbstractAWSConfig=global_aws_config()
@@ -1091,6 +1135,81 @@ function create_user_hierarchy_group(
         "PUT",
         "/user-hierarchy-groups/$(InstanceId)",
         Dict{String,Any}(mergewith(_merge, Dict{String,Any}("Name" => Name), params));
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    create_vocabulary(content, instance_id, language_code, vocabulary_name)
+    create_vocabulary(content, instance_id, language_code, vocabulary_name, params::Dict{String,<:Any})
+
+Creates a custom vocabulary associated with your Amazon Connect instance. You can set a
+custom vocabulary to be your default vocabulary for a given language. Contact Lens for
+Amazon Connect uses the default vocabulary in post-call and real-time contact analysis
+sessions for that language.
+
+# Arguments
+- `content`: The content of the custom vocabulary in plain-text format with a table of
+  values. Each row in the table represents a word or a phrase, described with Phrase, IPA,
+  SoundsLike, and DisplayAs fields. Separate the fields with TAB characters. The size limit
+  is 50KB. For more information, see Create a custom vocabulary using a table.
+- `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
+  in the ARN of the instance.
+- `language_code`: The language code of the vocabulary entries. For a list of languages and
+  their corresponding language codes, see What is Amazon Transcribe?
+- `vocabulary_name`: A unique name of the custom vocabulary.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"ClientToken"`: A unique, case-sensitive identifier that you provide to ensure the
+  idempotency of the request. If a create request is received more than once with same client
+  token, subsequent requests return the previous response without creating a vocabulary again.
+- `"Tags"`: The tags used to organize, track, or control access for this resource.
+"""
+function create_vocabulary(
+    Content,
+    InstanceId,
+    LanguageCode,
+    VocabularyName;
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connect(
+        "POST",
+        "/vocabulary/$(InstanceId)",
+        Dict{String,Any}(
+            "Content" => Content,
+            "LanguageCode" => LanguageCode,
+            "VocabularyName" => VocabularyName,
+            "ClientToken" => string(uuid4()),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function create_vocabulary(
+    Content,
+    InstanceId,
+    LanguageCode,
+    VocabularyName,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connect(
+        "POST",
+        "/vocabulary/$(InstanceId)",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}(
+                    "Content" => Content,
+                    "LanguageCode" => LanguageCode,
+                    "VocabularyName" => VocabularyName,
+                    "ClientToken" => string(uuid4()),
+                ),
+                params,
+            ),
+        );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
@@ -1250,8 +1369,8 @@ end
     delete_integration_association(instance_id, integration_association_id)
     delete_integration_association(instance_id, integration_association_id, params::Dict{String,<:Any})
 
-Deletes an AWS resource association from an Amazon Connect instance. The association must
-not have any use cases associated with it.
+Deletes an Amazon Web Services resource association from an Amazon Connect instance. The
+association must not have any use cases associated with it.
 
 # Arguments
 - `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
@@ -1470,6 +1589,43 @@ function delete_user_hierarchy_group(
     return connect(
         "DELETE",
         "/user-hierarchy-groups/$(InstanceId)/$(HierarchyGroupId)",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    delete_vocabulary(instance_id, vocabulary_id)
+    delete_vocabulary(instance_id, vocabulary_id, params::Dict{String,<:Any})
+
+Deletes the vocabulary that has the given identifier.
+
+# Arguments
+- `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
+  in the ARN of the instance.
+- `vocabulary_id`: The identifier of the custom vocabulary.
+
+"""
+function delete_vocabulary(
+    InstanceId, VocabularyId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return connect(
+        "POST",
+        "/vocabulary-remove/$(InstanceId)/$(VocabularyId)";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function delete_vocabulary(
+    InstanceId,
+    VocabularyId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connect(
+        "POST",
+        "/vocabulary-remove/$(InstanceId)/$(VocabularyId)",
         params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -2044,6 +2200,43 @@ function describe_user_hierarchy_structure(
     return connect(
         "GET",
         "/user-hierarchy-structure/$(InstanceId)",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    describe_vocabulary(instance_id, vocabulary_id)
+    describe_vocabulary(instance_id, vocabulary_id, params::Dict{String,<:Any})
+
+Describes the specified vocabulary.
+
+# Arguments
+- `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
+  in the ARN of the instance.
+- `vocabulary_id`: The identifier of the custom vocabulary.
+
+"""
+function describe_vocabulary(
+    InstanceId, VocabularyId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return connect(
+        "GET",
+        "/vocabulary/$(InstanceId)/$(VocabularyId)";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function describe_vocabulary(
+    InstanceId,
+    VocabularyId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connect(
+        "GET",
+        "/vocabulary/$(InstanceId)/$(VocabularyId)",
         params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -2913,6 +3106,48 @@ function list_contact_references(
 end
 
 """
+    list_default_vocabularies(instance_id)
+    list_default_vocabularies(instance_id, params::Dict{String,<:Any})
+
+Lists the default vocabularies for the specified Amazon Connect instance.
+
+# Arguments
+- `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
+  in the ARN of the instance.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"LanguageCode"`: The language code of the vocabulary entries. For a list of languages
+  and their corresponding language codes, see What is Amazon Transcribe?
+- `"MaxResults"`: The maximum number of results to return per page.
+- `"NextToken"`: The token for the next set of results. Use the value returned in the
+  previous response in the next request to retrieve the next set of results.
+"""
+function list_default_vocabularies(
+    InstanceId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return connect(
+        "POST",
+        "/default-vocabulary-summary/$(InstanceId)";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function list_default_vocabularies(
+    InstanceId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connect(
+        "POST",
+        "/default-vocabulary-summary/$(InstanceId)",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     list_hours_of_operations(instance_id)
     list_hours_of_operations(instance_id, params::Dict{String,<:Any})
 
@@ -3073,8 +3308,8 @@ end
     list_integration_associations(instance_id)
     list_integration_associations(instance_id, params::Dict{String,<:Any})
 
-Provides summary information about the AWS resource associations for the specified Amazon
-Connect instance.
+Provides summary information about the Amazon Web Services resource associations for the
+specified Amazon Connect instance.
 
 # Arguments
 - `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
@@ -3825,6 +4060,49 @@ function resume_contact_recording(
 end
 
 """
+    search_vocabularies(instance_id)
+    search_vocabularies(instance_id, params::Dict{String,<:Any})
+
+Searches for vocabularies within a specific Amazon Connect instance using State,
+NameStartsWith, and LanguageCode.
+
+# Arguments
+- `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
+  in the ARN of the instance.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"LanguageCode"`: The language code of the vocabulary entries. For a list of languages
+  and their corresponding language codes, see What is Amazon Transcribe?
+- `"MaxResults"`: The maximum number of results to return per page.
+- `"NameStartsWith"`: The starting pattern of the name of the vocabulary.
+- `"NextToken"`: The token for the next set of results. Use the value returned in the
+  previous response in the next request to retrieve the next set of results.
+- `"State"`: The current state of the custom vocabulary.
+"""
+function search_vocabularies(InstanceId; aws_config::AbstractAWSConfig=global_aws_config())
+    return connect(
+        "POST",
+        "/vocabulary-summary/$(InstanceId)";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function search_vocabularies(
+    InstanceId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return connect(
+        "POST",
+        "/vocabulary-summary/$(InstanceId)",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     start_chat_contact(contact_flow_id, instance_id, participant_details)
     start_chat_contact(contact_flow_id, instance_id, participant_details, params::Dict{String,<:Any})
 
@@ -3833,11 +4111,13 @@ provides a token required to obtain credentials from the CreateParticipantConnec
 the Amazon Connect Participant Service. When a new chat contact is successfully created,
 clients must subscribe to the participant’s connection for the created chat within 5
 minutes. This is achieved by invoking CreateParticipantConnection with WEBSOCKET and
-CONNECTION_CREDENTIALS.  A 429 error occurs in two situations:   API rate limit is
-exceeded. API TPS throttling returns a TooManyRequests exception.   The quota for
+CONNECTION_CREDENTIALS.  A 429 error occurs in the following situations:   API rate limit
+is exceeded. API TPS throttling returns a TooManyRequests exception.   The quota for
 concurrent active chats is exceeded. Active chat throttling returns a
-LimitExceededException.   For more information about chat, see Chat in the Amazon Connect
-Administrator Guide.
+LimitExceededException.   If you use the ChatDurationInMinutes parameter and receive a 400
+error, your account may not support the ability to configure custom chat durations. For
+more information, contact Amazon Web Services Support.  For more information about chat,
+see Chat in the Amazon Connect Administrator Guide.
 
 # Arguments
 - `contact_flow_id`: The identifier of the contact flow for initiating the chat. To see the
@@ -3857,6 +4137,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   standard Amazon Connect attributes. They can be accessed in contact flows just like any
   other contact attributes.  There can be up to 32,768 UTF-8 bytes across all key-value pairs
   per contact. Attribute keys can include only alphanumeric, dash, and underscore characters.
+- `"ChatDurationInMinutes"`: The total duration of the newly started chat session. If not
+  specified, the chat session duration defaults to 25 hour. The minumum configurable time is
+  60 minutes. The maximum configurable time is 10,080 minutes (7 days).
 - `"ClientToken"`: A unique, case-sensitive identifier that you provide to ensure the
   idempotency of the request.
 - `"InitialMessage"`: The initial message to be sent to the newly created chat.
@@ -5006,7 +5289,8 @@ value for the specified attribute type.
 
 # Arguments
 - `attribute_type`: The type of attribute.  Only allowlisted customers can consume
-  USE_CUSTOM_TTS_VOICES. To access this feature, contact AWS Support for allowlisting.
+  USE_CUSTOM_TTS_VOICES. To access this feature, contact Amazon Web Services Support for
+  allowlisting.
 - `instance_id`: The identifier of the Amazon Connect instance. You can find the instanceId
   in the ARN of the instance.
 - `value`: The value for the attribute. Maximum character limit is 100.

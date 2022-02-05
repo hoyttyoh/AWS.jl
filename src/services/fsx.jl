@@ -419,18 +419,18 @@ end
 
 Creates a new, empty Amazon FSx file system. You can create the following supported Amazon
 FSx file systems using the CreateFileSystem API operation:   Amazon FSx for Lustre   Amazon
-FSx for NetApp ONTAP   Amazon FSx for Windows File Server   This operation requires a
-client request token in the request that Amazon FSx uses to ensure idempotent creation.
-This means that calling the operation multiple times with the same client request token has
-no effect. By using the idempotent operation, you can retry a CreateFileSystem operation
-without the risk of creating an extra file system. This approach can be useful when an
-initial call fails in a way that makes it unclear whether a file system was created.
-Examples are if a transport level timeout occurred, or your connection was reset. If you
-use the same client request token and the initial call created a file system, the client
-receives success as long as the parameters are the same. If a file system with the
-specified client request token exists and the parameters match, CreateFileSystem returns
-the description of the existing file system. If a file system with the specified client
-request token exists and the parameters don't match, this call returns
+FSx for NetApp ONTAP   Amazon FSx for OpenZFS   Amazon FSx for Windows File Server   This
+operation requires a client request token in the request that Amazon FSx uses to ensure
+idempotent creation. This means that calling the operation multiple times with the same
+client request token has no effect. By using the idempotent operation, you can retry a
+CreateFileSystem operation without the risk of creating an extra file system. This approach
+can be useful when an initial call fails in a way that makes it unclear whether a file
+system was created. Examples are if a transport level timeout occurred, or your connection
+was reset. If you use the same client request token and the initial call created a file
+system, the client receives success as long as the parameters are the same. If a file
+system with the specified client request token exists and the parameters match,
+CreateFileSystem returns the description of the existing file system. If a file system with
+the specified client request token exists and the parameters don't match, this call returns
 IncompatibleParameterError. If a file system with the specified client request token
 doesn't exist, CreateFileSystem does the following:    Creates a new, empty Amazon FSx file
 system with an assigned ID, and an initial lifecycle state of CREATING.   Returns the
@@ -499,7 +499,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   values are SSD and HDD.   Set to SSD to use solid state drive storage. SSD is supported on
   all Windows, Lustre, ONTAP, and OpenZFS deployment types.   Set to HDD to use hard disk
   drive storage. HDD is supported on SINGLE_AZ_2 and MULTI_AZ_1 Windows file system
-  deployment types, and on PERSISTENT Lustre file system deployment types.    Default value
+  deployment types, and on PERSISTENT_1 Lustre file system deployment types.    Default value
   is SSD. For more information, see  Storage type options in the FSx for Windows File Server
   User Guide and Multiple storage options in the FSx for Lustre User Guide.
 - `"Tags"`: The tags to apply to the file system that's being created. The key value of the
@@ -1911,15 +1911,16 @@ can update multiple properties in a single request. For Amazon FSx for Windows F
 file systems, you can update the following properties:    AuditLogConfiguration
 AutomaticBackupRetentionDays     DailyAutomaticBackupStartTime
 SelfManagedActiveDirectoryConfiguration     StorageCapacity     ThroughputCapacity
-WeeklyMaintenanceStartTime    For FSx for Lustre file systems, you can update the following
-properties:    AutoImportPolicy     AutomaticBackupRetentionDays
+WeeklyMaintenanceStartTime    For Amazon FSx for Lustre file systems, you can update the
+following properties:    AutoImportPolicy     AutomaticBackupRetentionDays
 DailyAutomaticBackupStartTime     DataCompressionType     StorageCapacity
-WeeklyMaintenanceStartTime    For FSx for ONTAP file systems, you can update the following
-properties:    AutomaticBackupRetentionDays     DailyAutomaticBackupStartTime
-FsxAdminPassword     WeeklyMaintenanceStartTime    For the Amazon FSx for OpenZFS file
-systems, you can update the following properties:    AutomaticBackupRetentionDays
-CopyTagsToBackups     CopyTagsToVolumes     DailyAutomaticBackupStartTime
-DiskIopsConfiguration     ThroughputCapacity     WeeklyMaintenanceStartTime
+WeeklyMaintenanceStartTime    For Amazon FSx for NetApp ONTAP file systems, you can update
+the following properties:    AutomaticBackupRetentionDays     DailyAutomaticBackupStartTime
+    DiskIopsConfiguration     FsxAdminPassword     StorageCapacity
+WeeklyMaintenanceStartTime    For the Amazon FSx for OpenZFS file systems, you can update
+the following properties:    AutomaticBackupRetentionDays     CopyTagsToBackups
+CopyTagsToVolumes     DailyAutomaticBackupStartTime     ThroughputCapacity
+WeeklyMaintenanceStartTime
 
 # Arguments
 - `file_system_id`: The ID of the file system that you are updating.
@@ -1934,25 +1935,25 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"OpenZFSConfiguration"`: The configuration updates for an Amazon FSx for OpenZFS file
   system.
 - `"StorageCapacity"`: Use this parameter to increase the storage capacity of an Amazon FSx
-  for Windows File Server or Amazon FSx for Lustre file system. Specifies the storage
-  capacity target value, in GiB, to increase the storage capacity for the file system that
-  you're updating.   You can't make a storage capacity increase request if there is an
-  existing storage capacity increase request in progress.  For Windows file systems, the
-  storage capacity target value must be at least 10 percent greater than the current storage
-  capacity value. To increase storage capacity, the file system must have at least 16 MBps of
-  throughput capacity. For Lustre file systems, the storage capacity target value can be the
-  following:   For SCRATCH_2 and PERSISTENT_1 SSD deployment types, valid values are in
-  multiples of 2400 GiB. The value must be greater than the current storage capacity.   For
-  PERSISTENT HDD file systems, valid values are multiples of 6000 GiB for 12-MBps throughput
-  per TiB file systems and multiples of 1800 GiB for 40-MBps throughput per TiB file systems.
-  The values must be greater than the current storage capacity.   For SCRATCH_1 file systems,
-  you can't increase the storage capacity.   For OpenZFS file systems, the input/output
-  operations per second (IOPS) automatically scale with increases to the storage capacity if
-  IOPS is configured for automatic scaling. If the storage capacity increase would result in
-  less than 3 IOPS per GiB of storage, this operation returns an error.  For more
-  information, see Managing storage capacity in the Amazon FSx for Windows File Server User
-  Guide, Managing storage and throughput capacity in the Amazon FSx for Lustre User Guide,
-  and Managing storage capacity in the Amazon FSx for OpenZFS User Guide.
+  for Windows File Server, Amazon FSx for Lustre, or Amazon FSx for NetApp ONTAP file system.
+  Specifies the storage capacity target value, in GiB, to increase the storage capacity for
+  the file system that you're updating.   You can't make a storage capacity increase request
+  if there is an existing storage capacity increase request in progress.  For Windows file
+  systems, the storage capacity target value must be at least 10 percent greater than the
+  current storage capacity value. To increase storage capacity, the file system must have at
+  least 16 MBps of throughput capacity. For more information, see Managing storage capacity
+  in the Amazon FSx for Windows File Server User Guide. For Lustre file systems, the storage
+  capacity target value can be the following:   For SCRATCH_2, PERSISTENT_1, and PERSISTENT_2
+  SSD deployment types, valid values are in multiples of 2400 GiB. The value must be greater
+  than the current storage capacity.   For PERSISTENT HDD file systems, valid values are
+  multiples of 6000 GiB for 12-MBps throughput per TiB file systems and multiples of 1800 GiB
+  for 40-MBps throughput per TiB file systems. The values must be greater than the current
+  storage capacity.   For SCRATCH_1 file systems, you can't increase the storage capacity.
+  For more information, see Managing storage and throughput capacity in the Amazon FSx for
+  Lustre User Guide. For ONTAP file systems, the storage capacity target value must be at
+  least 10 percent greater than the current storage capacity value. For more information, see
+  Managing storage capacity and provisioned IOPS in the Amazon FSx for NetApp ONTAP User
+  Guide.
 - `"WindowsConfiguration"`: The configuration updates for an Amazon FSx for Windows File
   Server file system.
 """

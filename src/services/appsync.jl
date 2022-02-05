@@ -262,6 +262,7 @@ to compose the resolver logic.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"description"`: The Function description.
+- `"maxBatchSize"`: The maximum batching size for a resolver.
 - `"requestMappingTemplate"`: The Function request mapping template. Functions support only
   the 2018-05-29 version of the request mapping template.
 - `"responseMappingTemplate"`: The Function response mapping template.
@@ -390,6 +391,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   data source.    PIPELINE: A PIPELINE resolver type. You can use a PIPELINE resolver to
   invoke a series of Function objects in a serial manner. You can use a pipeline resolver to
   run a GraphQL query against multiple data sources.
+- `"maxBatchSize"`: The maximum batching size for a resolver.
 - `"pipelineConfig"`: The PipelineConfig.
 - `"requestMappingTemplate"`: The mapping template to use for requests. A resolver uses a
   request mapping template to convert a GraphQL expression into a format that a data source
@@ -1773,6 +1775,7 @@ Updates a Function object.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"description"`: The Function description.
+- `"maxBatchSize"`: The maximum batching size for a resolver.
 - `"requestMappingTemplate"`: The Function request mapping template. Functions support only
   the 2018-05-29 version of the request mapping template.
 - `"responseMappingTemplate"`: The Function request mapping template.
@@ -1892,6 +1895,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   data source.    PIPELINE: A PIPELINE resolver type. You can use a PIPELINE resolver to
   invoke a series of Function objects in a serial manner. You can use a pipeline resolver to
   run a GraphQL query against multiple data sources.
+- `"maxBatchSize"`: The maximum batching size for a resolver.
 - `"pipelineConfig"`: The PipelineConfig.
 - `"requestMappingTemplate"`: The new request mapping template. A resolver uses a request
   mapping template to convert a GraphQL expression into a format that a data source can

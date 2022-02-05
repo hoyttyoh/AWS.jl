@@ -151,7 +151,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Services generates a random one for you.
 - `"permissionVersion"`: Specifies the version of the RAM permission to associate with the
   resource share. If you don't specify this parameter, the operation uses the version
-  designated as the default.
+  designated as the default. You can use the ListPermissionVersions operation to discover the
+  available versions of a permission.
 - `"replace"`: Specifies whether the specified permission should replace or add to the
   existing permission associated with the resource share. Use true to replace the current
   permissions. Use false to add the permission to the current permission. The default value
@@ -800,6 +801,59 @@ function list_pending_invitation_resources(
                 ),
                 params,
             ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    list_permission_versions(permission_arn)
+    list_permission_versions(permission_arn, params::Dict{String,<:Any})
+
+Lists the available versions of the specified RAM permission.
+
+# Arguments
+- `permission_arn`: Specifies the Amazon Resoure Name (ARN) of the RAM permission whose
+  versions you want to list. You can use the permissionVersion parameter on the
+  AssociateResourceSharePermission operation to specify a non-default version to attach.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"maxResults"`: Specifies the total number of results that you want included on each page
+  of the response. If you do not include this parameter, it defaults to a value that is
+  specific to the operation. If additional items exist beyond the number you specify, the
+  NextToken response element is returned with a value (not null). Include the specified value
+  as the NextToken request parameter in the next call to the operation to get the next part
+  of the results. Note that the service might return fewer results than the maximum even when
+  there are more results available. You should check NextToken after every operation to
+  ensure that you receive all of the results.
+- `"nextToken"`: Specifies that you want to receive the next page of results. Valid only if
+  you received a NextToken response in the previous request. If you did, it indicates that
+  more output is available. Set this parameter to the value provided by the previous call's
+  NextToken response to request the next page of results.
+"""
+function list_permission_versions(
+    permissionArn; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return ram(
+        "POST",
+        "/listpermissionversions",
+        Dict{String,Any}("permissionArn" => permissionArn);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function list_permission_versions(
+    permissionArn,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return ram(
+        "POST",
+        "/listpermissionversions",
+        Dict{String,Any}(
+            mergewith(_merge, Dict{String,Any}("permissionArn" => permissionArn), params)
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,

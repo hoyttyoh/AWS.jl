@@ -1243,7 +1243,7 @@ minimize the potential impact of a DynamoDB eventually consistent read.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"AsyncInferenceConfig"`: Specifies configuration for how an endpoint performs
   asynchronous inference. This is a required field in order for your Endpoint to be invoked
-  using  InvokeEndpointAsync .
+  using InvokeEndpointAsync.
 - `"DataCaptureConfig"`:
 - `"KmsKeyId"`: The Amazon Resource Name (ARN) of a Amazon Web Services Key Management
   Service key that Amazon SageMaker uses to encrypt data on the storage volume attached to
@@ -8596,10 +8596,10 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   approval status.
 - `"ModelPackageGroupName"`: A filter that returns only model versions that belong to the
   specified model group.
-- `"ModelPackageType"`: A filter that returns onlyl the model packages of the specified
-  type. This can be one of the following values.    VERSIONED - List only versioned models.
-   UNVERSIONED - List only unversioined models.    BOTH - List both versioned and unversioned
-  models.
+- `"ModelPackageType"`: A filter that returns only the model packages of the specified
+  type. This can be one of the following values.    UNVERSIONED - List only unversioined
+  models. This is the default value if no ModelPackageType is specified.    VERSIONED - List
+  only versioned models.    BOTH - List both versioned and unversioned models.
 - `"NameContains"`: A string in the model package name. This filter returns only model
   packages whose name contains the specified string.
 - `"NextToken"`: If the response to a previous ListModelPackages request was truncated, the
@@ -10404,13 +10404,13 @@ end
 
 Stops a pipeline execution.  Callback Step  A pipeline execution won't stop while a
 callback step is running. When you call StopPipelineExecution on a pipeline execution with
-a running callback step, Amazon SageMaker Pipelines sends an additional Amazon SQS message
-to the specified SQS queue. The body of the SQS message contains a \"Status\" field which
-is set to \"Stopping\". You should add logic to your Amazon SQS message consumer to take
-any needed action (for example, resource cleanup) upon receipt of the message followed by a
+a running callback step, SageMaker Pipelines sends an additional Amazon SQS message to the
+specified SQS queue. The body of the SQS message contains a \"Status\" field which is set
+to \"Stopping\". You should add logic to your Amazon SQS message consumer to take any
+needed action (for example, resource cleanup) upon receipt of the message followed by a
 call to SendPipelineExecutionStepSuccess or SendPipelineExecutionStepFailure. Only when
-Amazon SageMaker Pipelines receives one of these calls will it stop the pipeline execution.
- Lambda Step  A pipeline execution can't be stopped while a lambda step is running because
+SageMaker Pipelines receives one of these calls will it stop the pipeline execution.
+Lambda Step  A pipeline execution can't be stopped while a lambda step is running because
 the Lambda function invoked by the lambda step can't be stopped. If you attempt to stop the
 execution while the Lambda function is running, the pipeline waits for the Lambda function
 to finish or until the timeout is hit, whichever occurs first, and then stops. If the

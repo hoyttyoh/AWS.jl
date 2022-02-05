@@ -707,8 +707,8 @@ supplied schema using DataFormat as the format. Since it does not take a schema 
 no compatibility checks are performed.
 
 # Arguments
-- `data_format`: The data format of the schema definition. Currently AVRO and JSON are
-  supported.
+- `data_format`: The data format of the schema definition. Currently AVRO, JSON and
+  PROTOBUF are supported.
 - `schema_definition`: The definition of the schema that has to be validated.
 
 """
@@ -1444,8 +1444,8 @@ used. When this API is called without a RegistryId, this will create an entry fo
 \"default-registry\" in the registry database tables, if it is not already present.
 
 # Arguments
-- `data_format`: The data format of the schema definition. Currently AVRO and JSON are
-  supported.
+- `data_format`: The data format of the schema definition. Currently AVRO, JSON and
+  PROTOBUF are supported.
 - `schema_name`: Name of the schema to be created of max length of 255, and may only
   contain letters, numbers, hyphen, underscore, dollar sign, or hash mark. No whitespace.
 
@@ -6089,6 +6089,9 @@ Starts a new run of the specified workflow.
 # Arguments
 - `name`: The name of the workflow to start.
 
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"RunProperties"`: The workflow run properties for the new workflow run.
 """
 function start_workflow_run(Name; aws_config::AbstractAWSConfig=global_aws_config())
     return glue(

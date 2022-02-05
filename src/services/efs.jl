@@ -126,23 +126,23 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   system that uses One Zone storage classes, automatic backups are enabled by default. For
   more information, see Automatic backups in the Amazon EFS User Guide. Default is false.
   However, if you specify an AvailabilityZoneName, the default is true.  Backup is not
-  available in all Amazon Web Services Regionswhere Amazon EFS is available.
+  available in all Amazon Web Services Regions where Amazon EFS is available.
 - `"Encrypted"`: A Boolean value that, if true, creates an encrypted file system. When
-  creating an encrypted file system, you have the option of specifying
-  CreateFileSystemRequestKmsKeyId for an existing Key Management Service (KMS customer master
-  key (CMK). If you don't specify a CMK, then the default CMK for Amazon EFS,
-  /aws/elasticfilesystem, is used to protect the encrypted file system.
-- `"KmsKeyId"`: The ID of the KMS CMK that you want to use to protect the encrypted file
+  creating an encrypted file system, you have the option of specifying an existing Key
+  Management Service key (KMS key). If you don't specify a KMS key, then the default KMS key
+  for Amazon EFS, /aws/elasticfilesystem, is used to protect the encrypted file system.
+- `"KmsKeyId"`: The ID of the KMS key that you want to use to protect the encrypted file
   system. This parameter is only required if you want to use a non-default KMS key. If this
-  parameter is not specified, the default CMK for Amazon EFS is used. This ID can be in one
-  of the following formats:   Key ID - A unique identifier of the key, for example
-  1234abcd-12ab-34cd-56ef-1234567890ab.   ARN - An Amazon Resource Name (ARN) for the key,
-  for example arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab.
-  Key alias - A previously created display name for a key, for example alias/projectKey1.
-  Key alias ARN - An ARN for a key alias, for example
-  arn:aws:kms:us-west-2:444455556666:alias/projectKey1.   If KmsKeyId is specified, the
-  CreateFileSystemRequestEncrypted parameter must be set to true.  EFS accepts only symmetric
-  KMS keys. You cannot use asymmetric KMS keys with EFS file systems.
+  parameter is not specified, the default KMS key for Amazon EFS is used. You can specify a
+  KMS key ID using the following formats:   Key ID - A unique identifier of the key, for
+  example 1234abcd-12ab-34cd-56ef-1234567890ab.   ARN - An Amazon Resource Name (ARN) for the
+  key, for example
+  arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab.   Key alias -
+  A previously created display name for a key, for example alias/projectKey1.   Key alias ARN
+  - An ARN for a key alias, for example arn:aws:kms:us-west-2:444455556666:alias/projectKey1.
+    If you use KmsKeyId, you must set the CreateFileSystemRequestEncrypted parameter to true.
+   EFS accepts only symmetric KMS keys. You cannot use asymmetric KMS keys with Amazon EFS
+  file systems.
 - `"PerformanceMode"`: The performance mode of the file system. We recommend generalPurpose
   performance mode for most file systems. File systems using the maxIO performance mode can
   scale to higher levels of aggregate throughput and operations per second with a tradeoff of
@@ -293,6 +293,76 @@ function create_mount_target(
                 Dict{String,Any}("FileSystemId" => FileSystemId, "SubnetId" => SubnetId),
                 params,
             ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    create_replication_configuration(destinations, source_file_system_id)
+    create_replication_configuration(destinations, source_file_system_id, params::Dict{String,<:Any})
+
+Creates a replication configuration that replicates an existing EFS file system to a new,
+read-only file system. For more information, see Amazon EFS replication. The replication
+configuration specifies the following:    Source file system - an existing EFS file system
+that you want replicated. The source file system cannot be a destination file system in an
+existing replication configuration.    Destination file system configuration - the
+configuration of the destination file system to which the source file system will be
+replicated. There can only be one destination file system in a replication configuration.
+ Amazon Web Services Region - The Amazon Web Services Region in which the destination file
+system is created. EFS Replication is available in all Amazon Web Services Region that
+Amazon EFS is available in, except the following regions: Asia Pacific (Hong Kong) Europe
+(Milan), Middle East (Bahrain), Africa (Cape Town), and Asia Pacific (Jakarta).
+Availability zone - If you want the destination file system to use One Zone availability
+and durability, you must specify the Availability Zone to create the file system in. For
+more information about EFS storage classes, see  Amazon EFS storage classes in the Amazon
+EFS User Guide.    Encryption - All destination file systems are created with encryption at
+rest enabled. You can specify the KMS key that is used to encrypt the destination file
+system. Your service-managed KMS key for Amazon EFS is used if you don't specify a KMS key.
+You cannot change this after the file system is created.     The following properties are
+set by default:    Performance mode - The destination file system's performance mode will
+match that of the source file system, unless the destination file system uses One Zone
+storage. In that case, the General Purpose performance mode is used. The Performance mode
+cannot be changed.    Throughput mode - The destination file system use the Bursting
+throughput mode by default. You can modify the throughput mode once the file system is
+created.   The following properties are turned off by default:    Lifecycle management -
+EFS lifecycle management and intelligent tiering are not enabled on the destination file
+system. You can enable EFS lifecycle management and intelligent tiering after the
+destination file system is created.    Automatic backups - Automatic daily backups not
+enabled on the destination file system. You can change this setting after the file system
+is created.   For more information, see Amazon EFS replication.
+
+# Arguments
+- `destinations`: An array of destination configuration objects. Only one destination
+  configuration object is supported.
+- `source_file_system_id`: Specifies the Amazon EFS file system that you want to replicate.
+  This file system cannot already be a source or destination file system in another
+  replication configuration.
+
+"""
+function create_replication_configuration(
+    Destinations, SourceFileSystemId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return efs(
+        "POST",
+        "/2015-02-01/file-systems/$(SourceFileSystemId)/replication-configuration",
+        Dict{String,Any}("Destinations" => Destinations);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function create_replication_configuration(
+    Destinations,
+    SourceFileSystemId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return efs(
+        "POST",
+        "/2015-02-01/file-systems/$(SourceFileSystemId)/replication-configuration",
+        Dict{String,Any}(
+            mergewith(_merge, Dict{String,Any}("Destinations" => Destinations), params)
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -496,6 +566,44 @@ function delete_mount_target(
     return efs(
         "DELETE",
         "/2015-02-01/mount-targets/$(MountTargetId)",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    delete_replication_configuration(source_file_system_id)
+    delete_replication_configuration(source_file_system_id, params::Dict{String,<:Any})
+
+Deletes an existing replication configuration. To delete a replication configuration, you
+must make the request from the Amazon Web Services Region in which the destination file
+system is located. Deleting a replication configuration ends the replication process. You
+can write to the destination file system once it's status becomes Writeable.
+
+# Arguments
+- `source_file_system_id`: The ID of the source file system in the replication
+  configuration.
+
+"""
+function delete_replication_configuration(
+    SourceFileSystemId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return efs(
+        "DELETE",
+        "/2015-02-01/file-systems/$(SourceFileSystemId)/replication-configuration";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function delete_replication_configuration(
+    SourceFileSystemId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return efs(
+        "DELETE",
+        "/2015-02-01/file-systems/$(SourceFileSystemId)/replication-configuration",
         params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -868,6 +976,45 @@ function describe_mount_targets(
     return efs(
         "GET",
         "/2015-02-01/mount-targets",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    describe_replication_configurations()
+    describe_replication_configurations(params::Dict{String,<:Any})
+
+Retrieves the replication configurations for either a specific file system, or all
+configurations for the Amazon Web Services account in an Amazon Web Services Region if a
+file system is not specified.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"FileSystemId"`: You can retrieve replication configurations for a specific file system
+  by providing a file system ID.
+- `"MaxResults"`: (Optional) You can optionally specify the MaxItems parameter to limit the
+  number of objects returned in a response. The default value is 100.
+- `"NextToken"`:  NextToken is present if the response is paginated. You can use NextMarker
+  in a subsequent request to fetch the next page of output.
+"""
+function describe_replication_configurations(;
+    aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return efs(
+        "GET",
+        "/2015-02-01/file-systems/replication-configurations";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function describe_replication_configurations(
+    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return efs(
+        "GET",
+        "/2015-02-01/file-systems/replication-configurations",
         params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,

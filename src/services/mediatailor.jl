@@ -77,7 +77,8 @@ Creates a channel.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"FillerSlate"`: The slate used to fill gaps between programs in the schedule. You must
-  configure filler slate if your channel uses a LINEAR PlaybackMode.
+  configure filler slate if your channel uses the LINEAR PlaybackMode. MediaTailor doesn't
+  support filler slate for channels using the LOOP PlaybackMode.
 - `"tags"`: The tags to assign to the channel.
 """
 function create_channel(
@@ -257,6 +258,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   authentication used to access content from your source location.
 - `"DefaultSegmentDeliveryConfiguration"`: The optional configuration for the server that
   serves segments.
+- `"SegmentDeliveryConfigurations"`:
 - `"tags"`: The tags to assign to the source location.
 """
 function create_source_location(
@@ -1375,6 +1377,11 @@ Updates an existing channel.
 - `outputs`: The channel's output properties.
 - `channel_name`: The identifier for the channel you are working on.
 
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"FillerSlate"`: The slate used to fill gaps between programs in the schedule. You must
+  configure filler slate if your channel uses the LINEAR PlaybackMode. MediaTailor doesn't
+  support filler slate for channels using the LOOP PlaybackMode.
 """
 function update_channel(
     Outputs, channelName; aws_config::AbstractAWSConfig=global_aws_config()
@@ -1418,6 +1425,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   authentication used to access content from your source location.
 - `"DefaultSegmentDeliveryConfiguration"`: The optional configuration for the host server
   that serves segments.
+- `"SegmentDeliveryConfigurations"`:
 """
 function update_source_location(
     HttpConfiguration, sourceLocationName; aws_config::AbstractAWSConfig=global_aws_config()

@@ -14,7 +14,9 @@ in progress, it can leave the VersionStage labels in an unexpected state. Depend
 step of the rotation in progress, you might need to remove the staging label AWSPENDING
 from the partially created version, specified by the VersionId response value. We recommend
 you also evaluate the partially rotated new version to see if it should be deleted. You can
-delete a version by removing all staging labels from it.
+delete a version by removing all staging labels from it.   Required permissions:
+secretsmanager:CancelRotateSecret. For more information, see  IAM policy actions for
+Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret. For an ARN, we recommend that you specify a
@@ -64,7 +66,9 @@ automatically have access to use aws/secretsmanager. Creating aws/secretsmanager
 in a one-time significant delay in returning the result. If the secret is in a different
 Amazon Web Services account from the credentials calling the API, then you can't use
 aws/secretsmanager to encrypt the secret, and you must create and use a customer managed
-KMS key.
+KMS key.   Required permissions:  secretsmanager:CreateSecret. For more information, see
+IAM policy actions for Secrets Manager and Authentication and access control in Secrets
+Manager.
 
 # Arguments
 - `name`: The name of the new secret. The secret name can contain ASCII letters, numbers,
@@ -169,7 +173,9 @@ end
     delete_resource_policy(secret_id, params::Dict{String,<:Any})
 
 Deletes the resource-based permission policy attached to the secret. To attach a policy to
-a secret, use PutResourcePolicy.
+a secret, use PutResourcePolicy.  Required permissions:
+secretsmanager:DeleteResourcePolicy. For more information, see  IAM policy actions for
+Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret to delete the attached resource-based policy
@@ -216,7 +222,9 @@ recovery window for the permanent delete to occur. At any time before recovery w
 you can use RestoreSecret to remove the DeletionDate and cancel the deletion of the secret.
 In a secret scheduled for deletion, you cannot access the encrypted secret value. To access
 that information, first cancel the deletion with RestoreSecret and then retrieve the
-information.
+information.  Required permissions:  secretsmanager:DeleteSecret. For more information, see
+ IAM policy actions for Secrets Manager and Authentication and access control in Secrets
+Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret to delete. For an ARN, we recommend that you
@@ -268,7 +276,9 @@ end
     describe_secret(secret_id, params::Dict{String,<:Any})
 
 Retrieves the details of a secret. It does not include the encrypted secret value. Secrets
-Manager only returns fields that have a value in the response.
+Manager only returns fields that have a value in the response.   Required permissions:
+secretsmanager:DescribeSecret. For more information, see  IAM policy actions for Secrets
+Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret.  For an ARN, we recommend that you specify a
@@ -304,6 +314,9 @@ end
 
 Generates a random password. We recommend that you specify the maximum length and include
 every character type that the system you are generating a password for can support.
+Required permissions:  secretsmanager:GetRandomPassword. For more information, see  IAM
+policy actions for Secrets Manager and Authentication and access control in Secrets
+Manager.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -344,7 +357,9 @@ end
 
 Retrieves the JSON text of the resource-based policy document attached to the secret. For
 more information about permissions policies attached to a secret, see Permissions policies
-attached to a secret.
+attached to a secret.  Required permissions:  secretsmanager:GetResourcePolicy. For more
+information, see  IAM policy actions for Secrets Manager and Authentication and access
+control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret to retrieve the attached resource-based policy
@@ -379,11 +394,14 @@ end
     get_secret_value(secret_id, params::Dict{String,<:Any})
 
 Retrieves the contents of the encrypted fields SecretString or SecretBinary from the
-specified version of a secret, whichever contains content. For information about retrieving
-the secret value in the console, see Retrieve secrets.  To run this command, you must have
-secretsmanager:GetSecretValue permissions. If the secret is encrypted using a
+specified version of a secret, whichever contains content. We recommend that you cache your
+secret values by using client-side caching. Caching secrets improves speed and reduces your
+costs. For more information, see Cache secrets for your applications.  Required
+permissions:  secretsmanager:GetSecretValue. If the secret is encrypted using a
 customer-managed key instead of the Amazon Web Services managed key aws/secretsmanager,
-then you also need kms:Decrypt permissions for that key.
+then you also need kms:Decrypt permissions for that key. For more information, see  IAM
+policy actions for Secrets Manager and Authentication and access control in Secrets
+Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret to retrieve. For an ARN, we recommend that you
@@ -430,9 +448,9 @@ end
     list_secret_version_ids(secret_id, params::Dict{String,<:Any})
 
 Lists the versions for a secret.  To list the secrets in the account, use ListSecrets. To
-get the secret value from SecretString or SecretBinary, call GetSecretValue.  Minimum
-permissions  To run this command, you must have secretsmanager:ListSecretVersionIds
-permissions.
+get the secret value from SecretString or SecretBinary, call GetSecretValue.  Required
+permissions:  secretsmanager:ListSecretVersionIds. For more information, see  IAM policy
+actions for Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret whose versions you want to list. For an ARN,
@@ -482,8 +500,9 @@ end
 Lists the secrets that are stored by Secrets Manager in the Amazon Web Services account.
 To list the versions of a secret, use ListSecretVersionIds. To get the secret value from
 SecretString or SecretBinary, call GetSecretValue. For information about finding secrets in
-the console, see Enhanced search capabilities for secrets in Secrets Manager.  Minimum
-permissions  To run this command, you must have secretsmanager:ListSecrets permissions.
+the console, see Enhanced search capabilities for secrets in Secrets Manager.  Required
+permissions:  secretsmanager:ListSecrets. For more information, see  IAM policy actions for
+Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -516,7 +535,9 @@ end
 Attaches a resource-based permission policy to a secret. A resource-based policy is
 optional. For more information, see Authentication and access control for Secrets Manager
 For information about attaching a policy in the console, see Attach a permissions policy to
-a secret.
+a secret.  Required permissions:  secretsmanager:PutResourcePolicy. For more information,
+see  IAM policy actions for Secrets Manager and Authentication and access control in
+Secrets Manager.
 
 # Arguments
 - `resource_policy`: A JSON-formatted string for an Amazon Web Services resource-based
@@ -583,7 +604,9 @@ AWSPREVIOUS to the version that AWSCURRENT was removed from. This operation is i
 If a version with a VersionId with the same value as the ClientRequestToken parameter
 already exists, and you specify the same secret data, the operation succeeds but does
 nothing. However, if the secret data is different, then the operation fails because you
-can't modify an existing version; you can only create new ones.
+can't modify an existing version; you can only create new ones.  Required permissions:
+secretsmanager:PutSecretValue. For more information, see  IAM policy actions for Secrets
+Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret to add a new version to. For an ARN, we
@@ -660,7 +683,9 @@ end
     remove_regions_from_replication(remove_replica_regions, secret_id, params::Dict{String,<:Any})
 
 For a secret that is replicated to other Regions, deletes the secret replicas from the
-Regions you specify.
+Regions you specify.  Required permissions:  secretsmanager:RemoveRegionsFromReplication.
+For more information, see  IAM policy actions for Secrets Manager and Authentication and
+access control in Secrets Manager.
 
 # Arguments
 - `remove_replica_regions`: The Regions of the replicas to remove.
@@ -705,7 +730,9 @@ end
     replicate_secret_to_regions(add_replica_regions, secret_id)
     replicate_secret_to_regions(add_replica_regions, secret_id, params::Dict{String,<:Any})
 
-Replicates the secret to a new Regions. See Multi-Region secrets.
+Replicates the secret to a new Regions. See Multi-Region secrets.  Required permissions:
+secretsmanager:ReplicateSecretToRegions. For more information, see  IAM policy actions for
+Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `add_replica_regions`: A list of Regions in which to replicate the secret.
@@ -753,7 +780,9 @@ end
     restore_secret(secret_id, params::Dict{String,<:Any})
 
 Cancels the scheduled deletion of a secret by removing the DeletedDate time stamp. You can
-access a secret again after it has been restored.
+access a secret again after it has been restored.  Required permissions:
+secretsmanager:RestoreSecret. For more information, see  IAM policy actions for Secrets
+Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret to restore. For an ARN, we recommend that you
@@ -800,9 +829,11 @@ new version. For more information, see How rotation works. When rotation is succ
 AWSPENDING staging label might be attached to the same version as the AWSCURRENT version,
 or it might not be attached to any version. If the AWSPENDING staging label is present but
 not attached to the same version as AWSCURRENT, then any later invocation of RotateSecret
-assumes that a previous rotation request is still in progress and returns an error. To run
-this command, you must have secretsmanager:RotateSecret permissions and
-lambda:InvokeFunction permissions on the function specified in the secret's metadata.
+assumes that a previous rotation request is still in progress and returns an error.
+Required permissions:  secretsmanager:RotateSecret. For more information, see  IAM policy
+actions for Secrets Manager and Authentication and access control in Secrets Manager. You
+also need lambda:InvokeFunction permissions on the rotation function. For more information,
+see  Permissions for rotation.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret to rotate. For an ARN, we recommend that you
@@ -822,6 +853,13 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   implement your own retry logic and you want to ensure that Secrets Manager doesn't attempt
   to create a secret version twice. We recommend that you generate a UUID-type value to
   ensure uniqueness within the specified secret.
+- `"RotateImmediately"`: Specifies whether to rotate the secret immediately or wait until
+  the next scheduled rotation window. The rotation schedule is defined in
+  RotateSecretRequestRotationRules. If you don't immediately rotate the secret, Secrets
+  Manager tests the rotation configuration by running the  testSecret step of the Lambda
+  rotation function. The test creates an AWSPENDING version of the secret and then removes
+  it. If you don't specify this value, then by default, Secrets Manager rotates the secret
+  immediately.
 - `"RotationLambdaARN"`: The ARN of the Lambda rotation function that can rotate the secret.
 - `"RotationRules"`: A structure that defines the rotation configuration for this secret.
 """
@@ -860,7 +898,9 @@ end
 
 Removes the link between the replica secret and the primary secret and promotes the replica
 to a primary secret in the replica Region. You must call this operation from the Region in
-which you want to promote the replica to a primary secret.
+which you want to promote the replica to a primary secret.  Required permissions:
+secretsmanager:StopReplicationToReplica. For more information, see  IAM policy actions for
+Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN of the primary secret.
@@ -909,7 +949,9 @@ letters, spaces, and numbers representable in UTF-8, plus the following special 
 + - = . _ : / @.    If you use tags as part of your security strategy, then adding or
 removing a tag can change permissions. If successfully completing this operation would
 result in you losing your permissions for this secret, then the operation is blocked and
-returns an Access Denied error.
+returns an Access Denied error.   Required permissions:  secretsmanager:TagResource. For
+more information, see  IAM policy actions for Secrets Manager and Authentication and access
+control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The identifier for the secret to attach tags to. You can specify either the
@@ -956,7 +998,9 @@ Removes specific tags from a secret. This operation is idempotent. If a requeste
 not attached to the secret, no error is returned and the secret metadata is unchanged.  If
 you use tags as part of your security strategy, then removing a tag can change permissions.
 If successfully completing this operation would result in you losing your permissions for
-this secret, then the operation is blocked and returns an Access Denied error.
+this secret, then the operation is blocked and returns an Access Denied error.   Required
+permissions:  secretsmanager:UntagResource. For more information, see  IAM policy actions
+for Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret. For an ARN, we recommend that you specify a
@@ -1022,9 +1066,11 @@ users and roles in the Amazon Web Services account automatically have access to 
 aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay
 in returning the result.  If the secret is in a different Amazon Web Services account from
 the credentials calling the API, then you can't use aws/secretsmanager to encrypt the
-secret, and you must create and use a customer managed key.  To run this command, you must
-have secretsmanager:UpdateSecret permissions. If you use a customer managed key, you must
-also have kms:GenerateDataKey and kms:Decrypt permissions .
+secret, and you must create and use a customer managed key.   Required permissions:
+secretsmanager:UpdateSecret. For more information, see  IAM policy actions for Secrets
+Manager and Authentication and access control in Secrets Manager. If you use a customer
+managed key, you must also have kms:GenerateDataKey and kms:Decrypt permissions on the key.
+For more information, see  Secret encryption and decryption.
 
 # Arguments
 - `secret_id`: The ARN or name of the secret. For an ARN, we recommend that you specify a
@@ -1102,7 +1148,9 @@ version.  You can move the AWSCURRENT staging label to this version by including
 call.  Whenever you move AWSCURRENT, Secrets Manager automatically moves the label
 AWSPREVIOUS to the version that AWSCURRENT was removed from.  If this action results in the
 last label being removed from a version, then the version is considered to be 'deprecated'
-and can be deleted by Secrets Manager.
+and can be deleted by Secrets Manager.  Required permissions:
+secretsmanager:UpdateSecretVersionStage. For more information, see  IAM policy actions for
+Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `secret_id`: The ARN or the name of the secret with the version and staging labelsto
@@ -1160,7 +1208,9 @@ secret. A resource-based policy is optional for secrets. The API performs three 
 validating the policy:   Sends a call to Zelkova, an automated reasoning engine, to ensure
 your resource policy does not allow broad access to your secret, for example policies that
 use a wildcard for the principal.   Checks for correct syntax in a policy.   Verifies the
-policy does not lock out a caller.
+policy does not lock out a caller.    Required permissions:
+secretsmanager:ValidateResourcePolicy. For more information, see  IAM policy actions for
+Secrets Manager and Authentication and access control in Secrets Manager.
 
 # Arguments
 - `resource_policy`: A JSON-formatted string that contains an Amazon Web Services

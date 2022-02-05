@@ -1840,15 +1840,14 @@ function update_resource(
 end
 
 """
-    update_table_objects(database_name, table_name, transaction_id, write_operations)
-    update_table_objects(database_name, table_name, transaction_id, write_operations, params::Dict{String,<:Any})
+    update_table_objects(database_name, table_name, write_operations)
+    update_table_objects(database_name, table_name, write_operations, params::Dict{String,<:Any})
 
 Updates the manifest of Amazon S3 objects that make up the specified governed table.
 
 # Arguments
 - `database_name`: The database containing the governed table to update.
 - `table_name`: The governed table to update.
-- `transaction_id`: The transaction at which to do the write.
 - `write_operations`: A list of WriteOperation objects that define an object to add to or
   delete from the manifest for a governed table.
 
@@ -1856,11 +1855,11 @@ Updates the manifest of Amazon S3 objects that make up the specified governed ta
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"CatalogId"`: The catalog containing the governed table to update. Defaults to the
   caller’s account ID.
+- `"TransactionId"`: The transaction at which to do the write.
 """
 function update_table_objects(
     DatabaseName,
     TableName,
-    TransactionId,
     WriteOperations;
     aws_config::AbstractAWSConfig=global_aws_config(),
 )
@@ -1870,7 +1869,6 @@ function update_table_objects(
         Dict{String,Any}(
             "DatabaseName" => DatabaseName,
             "TableName" => TableName,
-            "TransactionId" => TransactionId,
             "WriteOperations" => WriteOperations,
         );
         aws_config=aws_config,
@@ -1880,7 +1878,6 @@ end
 function update_table_objects(
     DatabaseName,
     TableName,
-    TransactionId,
     WriteOperations,
     params::AbstractDict{String};
     aws_config::AbstractAWSConfig=global_aws_config(),
@@ -1894,7 +1891,6 @@ function update_table_objects(
                 Dict{String,Any}(
                     "DatabaseName" => DatabaseName,
                     "TableName" => TableName,
-                    "TransactionId" => TransactionId,
                     "WriteOperations" => WriteOperations,
                 ),
                 params,

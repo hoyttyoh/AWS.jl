@@ -1493,8 +1493,8 @@ end
 Deletes the bandwidth rate limits of a gateway. You can delete either the upload and
 download bandwidth rate limit, or you can delete both. If you delete only one of the
 limits, the other limit remains unchanged. To specify which gateway to work with, use the
-Amazon Resource Name (ARN) of the gateway in your request. This operation is supported for
-the stored volume, cached volume and tape gateway types.
+Amazon Resource Name (ARN) of the gateway in your request. This operation is supported only
+for the stored volume, cached volume, and tape gateway types.
 
 # Arguments
 - `bandwidth_type`: One of the BandwidthType values that indicates the gateway bandwidth
@@ -1908,11 +1908,12 @@ end
     describe_bandwidth_rate_limit(gateway_arn, params::Dict{String,<:Any})
 
 Returns the bandwidth rate limits of a gateway. By default, these limits are not set, which
-means no bandwidth rate limiting is in effect. This operation is supported for the stored
-volume, cached volume, and tape gateway types. This operation only returns a value for a
-bandwidth rate limit only if the limit is set. If no limits are set for the gateway, then
-this operation returns only the gateway ARN in the response body. To specify which gateway
-to describe, use the Amazon Resource Name (ARN) of the gateway in your request.
+means no bandwidth rate limiting is in effect. This operation is supported only for the
+stored volume, cached volume, and tape gateway types. To describe bandwidth rate limits for
+S3 file gateways, use DescribeBandwidthRateLimitSchedule. This operation returns a value
+for a bandwidth rate limit only if the limit is set. If no limits are set for the gateway,
+then this operation returns only the gateway ARN in the response body. To specify which
+gateway to describe, use the Amazon Resource Name (ARN) of the gateway in your request.
 
 # Arguments
 - `gateway_arn`:
@@ -1949,16 +1950,17 @@ end
 
  Returns information about the bandwidth rate limit schedule of a gateway. By default,
 gateways do not have bandwidth rate limit schedules, which means no bandwidth rate limiting
-is in effect. This operation is supported only in the volume and tape gateway types.  This
-operation returns information about a gateway's bandwidth rate limit schedule. A bandwidth
-rate limit schedule consists of one or more bandwidth rate limit intervals. A bandwidth
-rate limit interval defines a period of time on one or more days of the week, during which
-bandwidth rate limits are specified for uploading, downloading, or both.   A bandwidth rate
-limit interval consists of one or more days of the week, a start hour and minute, an ending
-hour and minute, and bandwidth rate limits for uploading and downloading   If no bandwidth
-rate limit schedule intervals are set for the gateway, this operation returns an empty
-response. To specify which gateway to describe, use the Amazon Resource Name (ARN) of the
-gateway in your request.
+is in effect. This operation is supported only for volume, tape and S3 file gateways. FSx
+file gateways do not support bandwidth rate limits. This operation returns information
+about a gateway's bandwidth rate limit schedule. A bandwidth rate limit schedule consists
+of one or more bandwidth rate limit intervals. A bandwidth rate limit interval defines a
+period of time on one or more days of the week, during which bandwidth rate limits are
+specified for uploading, downloading, or both.   A bandwidth rate limit interval consists
+of one or more days of the week, a start hour and minute, an ending hour and minute, and
+bandwidth rate limits for uploading and downloading   If no bandwidth rate limit schedule
+intervals are set for the gateway, this operation returns an empty response. To specify
+which gateway to describe, use the Amazon Resource Name (ARN) of the gateway in your
+request.
 
 # Arguments
 - `gateway_arn`:
@@ -3817,11 +3819,13 @@ end
 
 Updates the bandwidth rate limits of a gateway. You can update both the upload and download
 bandwidth rate limit or specify only one of the two. If you don't set a bandwidth rate
-limit, the existing rate limit remains. This operation is supported for the stored volume,
-cached volume, and tape gateway types. By default, a gateway's bandwidth rate limits are
-not set. If you don't set any limit, the gateway does not have any limitations on its
-bandwidth usage and could potentially use the maximum available bandwidth. To specify which
-gateway to update, use the Amazon Resource Name (ARN) of the gateway in your request.
+limit, the existing rate limit remains. This operation is supported only for the stored
+volume, cached volume, and tape gateway types. To update bandwidth rate limits for S3 file
+gateways, use UpdateBandwidthRateLimitSchedule. By default, a gateway's bandwidth rate
+limits are not set. If you don't set any limit, the gateway does not have any limitations
+on its bandwidth usage and could potentially use the maximum available bandwidth. To
+specify which gateway to update, use the Amazon Resource Name (ARN) of the gateway in your
+request.
 
 # Arguments
 - `gateway_arn`:
@@ -3865,7 +3869,8 @@ end
  Updates the bandwidth rate limit schedule for a specified gateway. By default, gateways do
 not have bandwidth rate limit schedules, which means no bandwidth rate limiting is in
 effect. Use this to initiate or update a gateway's bandwidth rate limit schedule. This
-operation is supported in the volume and tape gateway types.
+operation is supported only for volume, tape and S3 file gateways. FSx file gateways do not
+support bandwidth rate limits.
 
 # Arguments
 - `bandwidth_rate_limit_intervals`:  An array containing bandwidth rate limit schedule

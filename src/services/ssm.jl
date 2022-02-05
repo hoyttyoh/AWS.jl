@@ -336,7 +336,12 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Change Calendar.
 - `"ComplianceSeverity"`: The severity level to assign to the association.
 - `"DocumentVersion"`: The document version you want to associate with the target(s). Can
-  be a specific version or the default version.
+  be a specific version or the default version.  State Manager doesn't support running
+  associations that use a new version of a document if that document is shared from another
+  account. State Manager always runs the default version of a document if shared from another
+  account, even though the Systems Manager console shows that a new version was processed. If
+  you want to run an association using a new version of a document shared form another
+  account, you must set the document version to default.
 - `"InstanceId"`: The managed node ID.   InstanceId has been deprecated. To specify a
   managed node ID for an association, use the Targets parameter. Requests that include the
   parameter InstanceID with Systems Manager documents (SSM documents) that use schema version
@@ -5694,14 +5699,21 @@ end
     update_association(association_id, params::Dict{String,<:Any})
 
 Updates an association. You can update the association name and version, the document
-version, schedule, parameters, and Amazon Simple Storage Service (Amazon S3) output.  In
-order to call this API operation, your Identity and Access Management (IAM) user account,
-group, or role must be configured with permission to call the DescribeAssociation API
-operation. If you don't have permission to call DescribeAssociation, then you receive the
-following error: An error occurred (AccessDeniedException) when calling the
-UpdateAssociation operation: User: &lt;user_arn&gt; isn't authorized to perform:
-ssm:DescribeAssociation on resource: &lt;resource_arn&gt;   When you update an association,
-the association immediately runs against the specified targets.
+version, schedule, parameters, and Amazon Simple Storage Service (Amazon S3) output. When
+you call UpdateAssociation, the system drops all optional parameters from the request and
+overwrites the association with null values for those parameters. This is by design. You
+must specify all optional parameters in the call, even if you are not changing the
+parameters. This includes the Name parameter. Before calling this API action, we recommend
+that you call the DescribeAssociation API operation and make a note of all optional
+parameters required for your UpdateAssociation call. In order to call this API operation,
+your Identity and Access Management (IAM) user account, group, or role must be configured
+with permission to call the DescribeAssociation API operation. If you don't have permission
+to call DescribeAssociation, then you receive the following error: An error occurred
+(AccessDeniedException) when calling the UpdateAssociation operation: User:
+&lt;user_arn&gt; isn't authorized to perform: ssm:DescribeAssociation on resource:
+&lt;resource_arn&gt;   When you update an association, the association immediately runs
+against the specified targets. You can add the ApplyOnlyAtCronInterval parameter to run the
+association during the next schedule run.
 
 # Arguments
 - `association_id`: The ID of the association you want to update.
@@ -5729,7 +5741,12 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   change calendar is open. For more information, see Amazon Web Services Systems Manager
   Change Calendar.
 - `"ComplianceSeverity"`: The severity level to assign to the association.
-- `"DocumentVersion"`: The document version you want update for the association.
+- `"DocumentVersion"`: The document version you want update for the association.   State
+  Manager doesn't support running associations that use a new version of a document if that
+  document is shared from another account. State Manager always runs the default version of a
+  document if shared from another account, even though the Systems Manager console shows that
+  a new version was processed. If you want to run an association using a new version of a
+  document shared form another account, you must set the document version to default.
 - `"MaxConcurrency"`: The maximum number of targets allowed to run the association at the
   same time. You can specify a number, for example 10, or a percentage of the target set, for
   example 10%. The default value is 100%, which means all targets run the association at the

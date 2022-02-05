@@ -948,6 +948,45 @@ function delete_bot_version(
 end
 
 """
+    delete_custom_vocabulary(bot_id, bot_version, locale_id)
+    delete_custom_vocabulary(bot_id, bot_version, locale_id, params::Dict{String,<:Any})
+
+Removes a custom vocabulary from the specified locale in the specified bot.
+
+# Arguments
+- `bot_id`: The unique identifier of the bot to remove the custom vocabulary from.
+- `bot_version`: The version of the bot to remove the custom vocabulary from.
+- `locale_id`: The locale identifier for the locale that contains the custom vocabulary to
+  remove.
+
+"""
+function delete_custom_vocabulary(
+    botId, botVersion, localeId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return lex_models_v2(
+        "DELETE",
+        "/bots/$(botId)/botversions/$(botVersion)/botlocales/$(localeId)/customvocabulary";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function delete_custom_vocabulary(
+    botId,
+    botVersion,
+    localeId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return lex_models_v2(
+        "DELETE",
+        "/bots/$(botId)/botversions/$(botVersion)/botlocales/$(localeId)/customvocabulary",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     delete_export(export_id)
     delete_export(export_id, params::Dict{String,<:Any})
 
@@ -1475,6 +1514,45 @@ function describe_bot_version(
 end
 
 """
+    describe_custom_vocabulary_metadata(bot_id, bot_version, locale_id)
+    describe_custom_vocabulary_metadata(bot_id, bot_version, locale_id, params::Dict{String,<:Any})
+
+Provides metadata information about a custom vocabulary.
+
+# Arguments
+- `bot_id`: The unique identifier of the bot that contains the custom vocabulary.
+- `bot_version`: The bot version of the bot to return metadata for.
+- `locale_id`: The locale to return the custom vocabulary information for. The locale must
+  be en_GB.
+
+"""
+function describe_custom_vocabulary_metadata(
+    botId, botVersion, localeId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return lex_models_v2(
+        "GET",
+        "/bots/$(botId)/botversions/$(botVersion)/botlocales/$(localeId)/customvocabulary/DEFAULT/metadata";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function describe_custom_vocabulary_metadata(
+    botId,
+    botVersion,
+    localeId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return lex_models_v2(
+        "GET",
+        "/bots/$(botId)/botversions/$(botVersion)/botlocales/$(localeId)/customvocabulary/DEFAULT/metadata",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     describe_export(export_id)
     describe_export(export_id, params::Dict{String,<:Any})
 
@@ -1977,8 +2055,10 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   are fewer results than the maximum page size, only the actual number of results are
   returned.
 - `"nextToken"`: If the response from the ListBots operation contains more results than
-  specified in the maxResults parameter, a token is returned in the response. Use that token
-  in the nextToken parameter to return the next page of results.
+  specified in the maxResults parameter, a token is returned in the response.  Use the
+  returned token in the nextToken parameter of a ListBots request to return the next page of
+  results. For a complete set of results, call the ListBots operation until the nextToken
+  returned in the response is null.
 - `"sortBy"`: Specifies sorting parameters for the list of bots. You can specify that the
   list be sorted by bot name in ascending or descending order.
 """
@@ -2093,7 +2173,8 @@ end
     list_exports()
     list_exports(params::Dict{String,<:Any})
 
-Lists the exports for a bot or bot locale. Exports are kept in the list for 7 days.
+Lists the exports for a bot, bot locale, or custom vocabulary. Exports are kept in the list
+for 7 days.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -2102,11 +2183,16 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"filters"`: Provides the specification of a filter used to limit the exports in the
   response to only those that match the filter specification. You can only specify one filter
   and one string to filter on.
+- `"localeId"`: Specifies the resources that should be exported. If you don't specify a
+  resource type in the filters parameter, both bot locales and custom vocabularies are
+  exported.
 - `"maxResults"`: The maximum number of exports to return in each page of results. If there
   are fewer results than the max page size, only the actual number of results are returned.
 - `"nextToken"`: If the response from the ListExports operation contains more results that
-  specified in the maxResults parameter, a token is returned in the response. Use that token
-  in the nextToken parameter to return the next page of results.
+  specified in the maxResults parameter, a token is returned in the response.  Use the
+  returned token in the nextToken parameter of a ListExports request to return the next page
+  of results. For a complete set of results, call the ListExports operation until the
+  nextToken returned in the response is null.
 - `"sortBy"`: Determines the field that the list of exports is sorted by. You can sort by
   the LastUpdatedDateTime field in ascending or descending order.
 """
@@ -2127,7 +2213,8 @@ end
     list_imports()
     list_imports(params::Dict{String,<:Any})
 
-Lists the imports for a bot or bot locale. Imports are kept in the list for 7 days.
+Lists the imports for a bot, bot locale, or custom vocabulary. Imports are kept in the list
+for 7 days.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -2136,11 +2223,16 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"filters"`: Provides the specification of a filter used to limit the bots in the
   response to only those that match the filter specification. You can only specify one filter
   and one string to filter on.
+- `"localeId"`: Specifies the locale that should be present in the list. If you don't
+  specify a resource type in the filters parameter, the list contains both bot locales and
+  custom vocabularies.
 - `"maxResults"`: The maximum number of imports to return in each page of results. If there
   are fewer results than the max page size, only the actual number of results are returned.
 - `"nextToken"`: If the response from the ListImports operation contains more results than
-  specified in the maxResults parameter, a token is returned in the response. Use that token
-  in the nextToken parameter to return the next page of results.
+  specified in the maxResults parameter, a token is returned in the response. Use the
+  returned token in the nextToken parameter of a ListImports request to return the next page
+  of results. For a complete set of results, call the ListImports operation until the
+  nextToken returned in the response is null.
 - `"sortBy"`: Determines the field that the list of imports is sorted by. You can sort by
   the LastUpdatedDateTime field in ascending or descending order.
 """
@@ -2177,8 +2269,10 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`: The maximum number of intents to return in each page of results. If there
   are fewer results than the max page size, only the actual number of results are returned.
 - `"nextToken"`: If the response from the ListIntents operation contains more results than
-  specified in the maxResults parameter, a token is returned in the response. Use that token
-  in the nextToken parameter to return the next page of results.
+  specified in the maxResults parameter, a token is returned in the response. Use the
+  returned token in the nextToken parameter of a ListIntents request to return the next page
+  of results. For a complete set of results, call the ListIntents operation until the
+  nextToken returned in the response is null.
 - `"sortBy"`: Determines the sort order for the response from the ListIntents operation.
   You can choose to sort by the intent name or last updated date in either ascending or
   descending order.
@@ -2531,7 +2625,8 @@ end
     start_import(import_id, merge_strategy, resource_specification)
     start_import(import_id, merge_strategy, resource_specification, params::Dict{String,<:Any})
 
-Starts importing a bot or bot locale from a zip archive that you uploaded to an S3 bucket.
+Starts importing a bot, bot locale, or custom vocabulary from a zip archive that you
+uploaded to an S3 bucket.
 
 # Arguments
 - `import_id`: The unique identifier for the import. It is included in the response from
@@ -2539,13 +2634,14 @@ Starts importing a bot or bot locale from a zip archive that you uploaded to an 
 - `merge_strategy`: The strategy to use when there is a name conflict between the imported
   resource and an existing resource. When the merge strategy is FailOnConflict existing
   resources are not overwritten and the import fails.
-- `resource_specification`: Parameters for creating the bot or bot locale.
+- `resource_specification`: Parameters for creating the bot, bot locale or custom
+  vocabulary.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"filePassword"`: The password used to encrypt the zip archive that contains the bot or
-  bot locale definition. You should always encrypt the zip archive to protect it during
-  transit between your site and Amazon Lex.
+- `"filePassword"`: The password used to encrypt the zip archive that contains the resource
+  definition. You should always encrypt the zip archive to protect it during transit between
+  your site and Amazon Lex.
 """
 function start_import(
     importId,

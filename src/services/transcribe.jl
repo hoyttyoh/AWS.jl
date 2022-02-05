@@ -139,10 +139,10 @@ transcribes your audio file.
   that you're calling. Enter information about your VocabularyFileUri in the following
   format:
   https://s3.&lt;aws-region&gt;.amazonaws.com/&lt;bucket-name&gt;/&lt;keyprefix&gt;/&lt;object
-  key&gt;   The following is an example URI for a vocabulary file that is stored in Amazon
-  S3:  https://s3.us-east-1.amazonaws.com/AWSDOC-EXAMPLE-BUCKET/vocab.txt  For more
-  information about Amazon S3 object names, see Object Keys in the Amazon S3 Developer Guide.
-  For more information about custom vocabularies, see Medical Custom Vocabularies.
+  key&gt;  The following is an example URI for a vocabulary file that is stored in Amazon S3:
+   https://s3.us-east-1.amazonaws.com/AWSDOC-EXAMPLE-BUCKET/vocab.txt  For more information
+  about Amazon S3 object names, see Object Keys in the Amazon S3 Developer Guide. For more
+  information about custom vocabularies, see Medical Custom Vocabularies.
 - `vocabulary_name`: The name of the custom vocabulary. This case-sensitive name must be
   unique within an Amazon Web Services account. If you try to create a vocabulary with the
   same name as a previous vocabulary, you get a ConflictException error.
@@ -203,7 +203,7 @@ handles transcription of an audio file.
 
 # Arguments
 - `language_code`: The language code of the vocabulary entries. For a list of languages and
-  their corresponding language codes, see transcribe-whatis.
+  their corresponding language codes, see table-language-matrix.
 - `vocabulary_name`: The name of the vocabulary. The name must be unique within an Amazon
   Web Services account. The name is case sensitive. If you try to create a vocabulary with
   the same name as a previous vocabulary you will receive a ConflictException error.
@@ -215,9 +215,11 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Transcribe vocabulary at the time you create this new vocabulary.
 - `"VocabularyFileUri"`: The S3 location of the text file that contains the definition of
   the custom vocabulary. The URI must be in the same region as the API endpoint that you are
-  calling. The general form is: For more information about S3 object names, see Object Keys
-  in the Amazon S3 Developer Guide. For more information about custom vocabularies, see
-  Custom vocabularies.
+  calling. The general form is:  https://s3.&lt;Amazon Web
+  Services-region&gt;.amazonaws.com/&lt;AWSDOC-EXAMPLE-BUCKET&gt;/&lt;keyprefix&gt;/&lt;object
+  key&gt;   For example:  https://s3.us-east-1.amazonaws.com/AWSDOC-EXAMPLE-BUCKET/vocab.txt
+  For more information about S3 object names, see Object Keys in the Amazon S3 Developer
+  Guide. For more information about custom vocabularies, see Custom vocabularies.
 """
 function create_vocabulary(
     LanguageCode, VocabularyName; aws_config::AbstractAWSConfig=global_aws_config()
@@ -1290,20 +1292,20 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   can use either of the following to identify a KMS key in the current account or another
   account:   Amazon Resource Name (ARN) of a KMS key in the current account or another
   account: \"arn:aws:kms:region:account ID:key/1234abcd-12ab-34cd-56ef1234567890ab\"   ARN of
-  a KMS Key Alias: \"arn:aws:kms:region:account ID:alias/ExampleAlias\"   If you don't
-  specify an encryption key, the output of the call analytics job is encrypted with the
-  default Amazon S3 key (SSE-S3). If you specify a KMS key to encrypt your output, you must
-  also specify an output location in the OutputLocation parameter.
+  a KMS Key Alias: \"arn:aws:kms:region:accountID:alias/ExampleAlias\"   If you don't specify
+  an encryption key, the output of the call analytics job is encrypted with the default
+  Amazon S3 key (SSE-S3). If you specify a KMS key to encrypt your output, you must also
+  specify an output location in the OutputLocation parameter.
 - `"OutputLocation"`: The Amazon S3 location where the output of the call analytics job is
   stored. You can provide the following location types to store the output of call analytics
   job:   s3://DOC-EXAMPLE-BUCKET1  If you specify a bucket, Amazon Transcribe saves the
   output of the analytics job as a JSON file at the root level of the bucket.
   s3://DOC-EXAMPLE-BUCKET1/folder/ f you specify a path, Amazon Transcribe saves the output
-  of the analytics job as s3://DOC-EXAMPLE-BUCKET1/folder/your-transcription-job-name.json If
-  you specify a folder, you must provide a trailing slash.
-  s3://DOC-EXAMPLE-BUCKET1/folder/filename.json  If you provide a path that has the filename
+  of the analytics job as s3://DOC-EXAMPLE-BUCKET1/folder/your-transcription-job-name.json.
+  If you specify a folder, you must provide a trailing slash.
+  s3://DOC-EXAMPLE-BUCKET1/folder/filename.json.  If you provide a path that has the filename
   specified, Amazon Transcribe saves the output of the analytics job as
-  s3://DOC-EXAMPLEBUCKET1/folder/filename.json   You can specify an Amazon Web Services Key
+  s3://DOC-EXAMPLEBUCKET1/folder/filename.json.   You can specify an Amazon Web Services Key
   Management Service (KMS) key to encrypt the output of our analytics job using the
   OutputEncryptionKMSKeyId parameter. If you don't specify a KMS key, Amazon Transcribe uses
   the default Amazon S3 key for server-side encryption of the analytics job output that is
@@ -1742,7 +1744,8 @@ the existing information with the values that you provide in the request.
 
 # Arguments
 - `language_code`: The language code of the language used for the entries in the updated
-  vocabulary. US English (en-US) is the only valid language code in Amazon Transcribe Medical.
+  vocabulary. U.S. English (en-US) is the only valid language code in Amazon Transcribe
+  Medical.
 - `vocabulary_name`: The name of the vocabulary to update. The name is case sensitive. If
   you try to update a vocabulary with the same name as a vocabulary you've already made, you
   get a ConflictException error.
@@ -1801,7 +1804,7 @@ all of the existing information with the values that you provide in the request.
 
 # Arguments
 - `language_code`: The language code of the vocabulary entries. For a list of languages and
-  their corresponding language codes, see transcribe-whatis.
+  their corresponding language codes, see Supported languages.
 - `vocabulary_name`: The name of the vocabulary to update. The name is case sensitive. If
   you try to update a vocabulary with the same name as a previous vocabulary you will receive
   a ConflictException error.
@@ -1811,9 +1814,12 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"Phrases"`: An array of strings containing the vocabulary entries.
 - `"VocabularyFileUri"`: The S3 location of the text file that contains the definition of
   the custom vocabulary. The URI must be in the same region as the API endpoint that you are
-  calling. The general form is  For example: For more information about S3 object names, see
-  Object Keys in the Amazon S3 Developer Guide. For more information about custom
-  vocabularies, see Custom Vocabularies.
+  calling. The general form is:
+  https://s3.&lt;aws-region&gt;.amazonaws.com/&lt;AWSDOC-EXAMPLE-BUCKET&gt;/&lt;keyprefix&gt
+  ;/&lt;objectkey&gt;  For example:
+  https://s3.us-east-1.amazonaws.com/AWSDOC-EXAMPLE-BUCKET/vocab.txt  For more information
+  about S3 object names, see Object Keys in the Amazon S3 Developer Guide. For more
+  information about custom vocabularies, see Custom Vocabularies.
 """
 function update_vocabulary(
     LanguageCode, VocabularyName; aws_config::AbstractAWSConfig=global_aws_config()

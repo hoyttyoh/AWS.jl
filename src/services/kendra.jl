@@ -449,7 +449,8 @@ end
     create_faq(index_id, name, role_arn, s3_path)
     create_faq(index_id, name, role_arn, s3_path, params::Dict{String,<:Any})
 
-Creates an new set of frequently asked question (FAQ) questions and answers.
+Creates an new set of frequently asked question (FAQ) questions and answers. Adding FAQs to
+an index is an asynchronous operation.
 
 # Arguments
 - `index_id`: The identifier of the index that contains the FAQ.
@@ -2056,8 +2057,8 @@ function put_principal_mapping(
 end
 
 """
-    query(index_id, query_text)
-    query(index_id, query_text, params::Dict{String,<:Any})
+    query(index_id)
+    query(index_id, params::Dict{String,<:Any})
 
 Searches an active index. Use this API to search your documents using query. The Query
 operation enables to do faceted search and to filter results based on document attributes.
@@ -2071,7 +2072,6 @@ query returns the 100 most relevant results.
 # Arguments
 - `index_id`: The unique identifier of the index to search. The identifier is returned in
   the response from the CreateIndex operation.
-- `query_text`: The text to search for.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -2100,6 +2100,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   than 100 results, only 100 are returned.
 - `"QueryResultTypeFilter"`: Sets the type of query. Only results for the specified query
   type are returned.
+- `"QueryText"`: The text to search for.
 - `"RequestedDocumentAttributes"`: An array of document attributes to include in the
   response. No other document attributes are included in the response. By default all
   document attributes are included in the response.
@@ -2114,29 +2115,20 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   unique identifier, such as a GUID. Don't use personally identifiable information, such as
   the user's email address, as the VisitorId.
 """
-function query(IndexId, QueryText; aws_config::AbstractAWSConfig=global_aws_config())
+function query(IndexId; aws_config::AbstractAWSConfig=global_aws_config())
     return kendra(
         "Query",
-        Dict{String,Any}("IndexId" => IndexId, "QueryText" => QueryText);
+        Dict{String,Any}("IndexId" => IndexId);
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
 end
 function query(
-    IndexId,
-    QueryText,
-    params::AbstractDict{String};
-    aws_config::AbstractAWSConfig=global_aws_config(),
+    IndexId, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
 )
     return kendra(
         "Query",
-        Dict{String,Any}(
-            mergewith(
-                _merge,
-                Dict{String,Any}("IndexId" => IndexId, "QueryText" => QueryText),
-                params,
-            ),
-        );
+        Dict{String,Any}(mergewith(_merge, Dict{String,Any}("IndexId" => IndexId), params));
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )

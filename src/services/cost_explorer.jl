@@ -429,12 +429,16 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"Filter"`: Filters Amazon Web Services costs by different dimensions. For example, you
   can specify SERVICE and LINKED_ACCOUNT and get the costs that are associated with that
   account's usage of that service. You can nest Expression objects to define any combination
-  of dimension filters. For more information, see Expression.
+  of dimension filters. For more information, see Expression.  Valid values for MatchOptions
+  for CostCategories and Tags are EQUALS, ABSENT, and CASE_SENSITIVE. The default values are
+  EQUALS and CASE_SENSITIVE. Valid values for MatchOptions for Dimensions are EQUALS and
+  CASE_SENSITIVE.
 - `"GroupBy"`: You can group Amazon Web Services costs using up to two different groups,
   either dimensions, tag keys, cost categories, or any two group by types. Valid values for
-  the DIMENSION type are AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, LINKED_ACCOUNT, OPERATION,
-  PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE. When you group by
-  the TAG type and include a valid tag key, you get all tag values, including empty strings.
+  the DIMENSION type are AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY,
+  LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and
+  USAGE_TYPE. When you group by the TAG type and include a valid tag key, you get all tag
+  values, including empty strings.
 - `"NextPageToken"`: The token to retrieve the next set of results. Amazon Web Services
   provides the token when the response from a previous call has more results than the maximum
   page size.
@@ -498,7 +502,9 @@ User Guide.
   of dimension filters. For more information, see Expression.  The
   GetCostAndUsageWithResources operation requires that you either group by or filter by a
   ResourceId. It requires the Expression \"SERVICE = Amazon Elastic Compute Cloud - Compute\"
-  in the filter.
+  in the filter. Valid values for MatchOptions for CostCategories and Tags are EQUALS,
+  ABSENT, and CASE_SENSITIVE. The default values are EQUALS and CASE_SENSITIVE. Valid values
+  for MatchOptions for Dimensions are EQUALS and CASE_SENSITIVE.
 - `granularity`: Sets the Amazon Web Services cost granularity to MONTHLY, DAILY, or
   HOURLY. If Granularity isn't set, the response object doesn't include the Granularity,
   MONTHLY, DAILY, or HOURLY.
@@ -711,43 +717,57 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   the context is set to COST_AND_USAGE, the resulting dimension values can be used in the
   GetCostAndUsage operation. If you set the context to COST_AND_USAGE, you can use the
   following dimensions for searching:   AZ - The Availability Zone. An example is us-east-1a.
-    DATABASE_ENGINE - The Amazon Relational Database Service database. Examples are Aurora or
-  MySQL.   INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge.
-  LEGAL_ENTITY_NAME - The name of the organization that sells you Amazon Web Services
-  services, such as Amazon Web Services.   LINKED_ACCOUNT - The description in the attribute
-  map that includes the full name of the member account. The value field contains the Amazon
-  Web Services ID of the member account.   OPERATING_SYSTEM - The operating system. Examples
-  are Windows or Linux.   OPERATION - The action performed. Examples include RunInstance and
-  CreateBucket.   PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux.
-   PURCHASE_TYPE - The reservation type of the purchase to which this usage is related.
-  Examples include On-Demand Instances and Standard Reserved Instances.   SERVICE - The
-  Amazon Web Services service such as Amazon DynamoDB.   USAGE_TYPE - The type of usage. An
-  example is DataTransfer-In-Bytes. The response for the GetDimensionValues operation
-  includes a unit attribute. Examples include GB and Hrs.   USAGE_TYPE_GROUP - The grouping
-  of common usage types. An example is Amazon EC2: CloudWatch – Alarms. The response for
-  this operation includes a unit attribute.   REGION - The Amazon Web Services Region.
-  RECORD_TYPE - The different types of charges such as RI fees, usage costs, tax refunds, and
-  credits.   RESOURCE_ID - The unique identifier of the resource. ResourceId is an opt-in
-  feature only available for last 14 days for EC2-Compute Service.   If you set the context
-  to RESERVATIONS, you can use the following dimensions for searching:   AZ - The
-  Availability Zone. An example is us-east-1a.   CACHE_ENGINE - The Amazon ElastiCache
-  operating system. Examples are Windows or Linux.   DEPLOYMENT_OPTION - The scope of Amazon
-  Relational Database Service deployments. Valid values are SingleAZ and MultiAZ.
-  INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge.   LINKED_ACCOUNT
-  - The description in the attribute map that includes the full name of the member account.
-  The value field contains the Amazon Web Services ID of the member account.   PLATFORM - The
-  Amazon EC2 operating system. Examples are Windows or Linux.   REGION - The Amazon Web
-  Services Region.   SCOPE (Utilization only) - The scope of a Reserved Instance (RI). Values
-  are regional or a single Availability Zone.   TAG (Coverage only) - The tags that are
-  associated with a Reserved Instance (RI).   TENANCY - The tenancy of a resource. Examples
-  are shared or dedicated.   If you set the context to SAVINGS_PLANS, you can use the
-  following dimensions for searching:   SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2
-  Instance or Compute)   PAYMENT_OPTION - Payment option for the given Savings Plans (for
-  example, All Upfront)   REGION - The Amazon Web Services Region.   INSTANCE_TYPE_FAMILY -
-  The family of instances (For example, m5)   LINKED_ACCOUNT - The description in the
-  attribute map that includes the full name of the member account. The value field contains
-  the Amazon Web Services ID of the member account.   SAVINGS_PLAN_ARN - The unique
-  identifier for your Savings Plan
+    BILLING_ENTITY - The Amazon Web Services seller that your account is with. Possible
+  values are the following: - Amazon Web Services(Amazon Web Services): The entity that sells
+  Amazon Web Services services. - AISPL (Amazon Internet Services Pvt. Ltd.): The local
+  Indian entity that is an acting reseller for Amazon Web Services services in India. -
+  Amazon Web Services Marketplace: The entity that supports the sale of solutions built on
+  Amazon Web Services by third-party software providers.   CACHE_ENGINE - The Amazon
+  ElastiCache operating system. Examples are Windows or Linux.   DEPLOYMENT_OPTION - The
+  scope of Amazon Relational Database Service deployments. Valid values are SingleAZ and
+  MultiAZ.   DATABASE_ENGINE - The Amazon Relational Database Service database. Examples are
+  Aurora or MySQL.   INSTANCE_TYPE - The type of Amazon EC2 instance. An example is
+  m4.xlarge.   INSTANCE_TYPE_FAMILY - A family of instance types optimized to fit different
+  use cases. Examples are Compute Optimized (C4, C5, C6g, C7g etc.), Memory Optimization (R4,
+  R5n, R5b, R6g etc).   INVOICING_ENTITY - The name of the entity issuing the Amazon Web
+  Services invoice.   LEGAL_ENTITY_NAME - The name of the organization that sells you Amazon
+  Web Services services, such as Amazon Web Services.   LINKED_ACCOUNT - The description in
+  the attribute map that includes the full name of the member account. The value field
+  contains the Amazon Web Services ID of the member account.   OPERATING_SYSTEM - The
+  operating system. Examples are Windows or Linux.   OPERATION - The action performed.
+  Examples include RunInstance and CreateBucket.   PLATFORM - The Amazon EC2 operating
+  system. Examples are Windows or Linux.   PURCHASE_TYPE - The reservation type of the
+  purchase to which this usage is related. Examples include On-Demand Instances and Standard
+  Reserved Instances.   RESERVATION_ID - The unique identifier for an Amazon Web Services
+  Reservation Instance.   SAVINGS_PLAN_ARN - The unique identifier for your Savings Plans.
+  SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute).   SERVICE - The
+  Amazon Web Services service such as Amazon DynamoDB.   TENANCY - The tenancy of a resource.
+  Examples are shared or dedicated.   USAGE_TYPE - The type of usage. An example is
+  DataTransfer-In-Bytes. The response for the GetDimensionValues operation includes a unit
+  attribute. Examples include GB and Hrs.   USAGE_TYPE_GROUP - The grouping of common usage
+  types. An example is Amazon EC2: CloudWatch – Alarms. The response for this operation
+  includes a unit attribute.   REGION - The Amazon Web Services Region.   RECORD_TYPE - The
+  different types of charges such as RI fees, usage costs, tax refunds, and credits.
+  RESOURCE_ID - The unique identifier of the resource. ResourceId is an opt-in feature only
+  available for last 14 days for EC2-Compute Service.   If you set the context to
+  RESERVATIONS, you can use the following dimensions for searching:   AZ - The Availability
+  Zone. An example is us-east-1a.   CACHE_ENGINE - The Amazon ElastiCache operating system.
+  Examples are Windows or Linux.   DEPLOYMENT_OPTION - The scope of Amazon Relational
+  Database Service deployments. Valid values are SingleAZ and MultiAZ.   INSTANCE_TYPE - The
+  type of Amazon EC2 instance. An example is m4.xlarge.   LINKED_ACCOUNT - The description in
+  the attribute map that includes the full name of the member account. The value field
+  contains the Amazon Web Services ID of the member account.   PLATFORM - The Amazon EC2
+  operating system. Examples are Windows or Linux.   REGION - The Amazon Web Services Region.
+    SCOPE (Utilization only) - The scope of a Reserved Instance (RI). Values are regional or
+  a single Availability Zone.   TAG (Coverage only) - The tags that are associated with a
+  Reserved Instance (RI).   TENANCY - The tenancy of a resource. Examples are shared or
+  dedicated.   If you set the context to SAVINGS_PLANS, you can use the following dimensions
+  for searching:   SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute)
+  PAYMENT_OPTION - Payment option for the given Savings Plans (for example, All Upfront)
+  REGION - The Amazon Web Services Region.   INSTANCE_TYPE_FAMILY - The family of instances
+  (For example, m5)   LINKED_ACCOUNT - The description in the attribute map that includes the
+  full name of the member account. The value field contains the Amazon Web Services ID of the
+  member account.   SAVINGS_PLAN_ARN - The unique identifier for your Savings Plans.
 - `"Filter"`:
 - `"MaxResults"`: This field is only used when SortBy is provided in the request. The
   maximum number of objects that to be returned for this request. If MaxResults is not
@@ -830,8 +850,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   MONTHLY or DAILY. The GetReservationCoverage operation supports only DAILY and MONTHLY
   granularities.
 - `"GroupBy"`: You can group the data by the following attributes:   AZ   CACHE_ENGINE
-  DATABASE_ENGINE   DEPLOYMENT_OPTION   INSTANCE_TYPE   LINKED_ACCOUNT   OPERATING_SYSTEM
-  PLATFORM   REGION   TENANCY
+  DATABASE_ENGINE   DEPLOYMENT_OPTION   INSTANCE_TYPE   INVOICING_ENTITY   LINKED_ACCOUNT
+  OPERATING_SYSTEM   PLATFORM   REGION   TENANCY
 - `"MaxResults"`: The maximum number of objects that you returned for this request. If more
   objects are available, in the response, Amazon Web Services provides a NextPageToken value
   that you can use in a subsequent call to get the next batch of objects.

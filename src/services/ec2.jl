@@ -2626,6 +2626,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   only permitted instances can use the reserved capacity.    Default: open
 - `"OutpostArn"`: The Amazon Resource Name (ARN) of the Outpost on which to create the
   Capacity Reservation.
+- `"PlacementGroupArn"`: The Amazon Resource Name (ARN) of the cluster placement group in
+  which to create the Capacity Reservation. For more information, see  Capacity Reservations
+  for cluster placement groups in the Amazon EC2 User Guide.
 - `"TagSpecifications"`: The tags to apply to the Capacity Reservation during launch.
 - `"Tenancy"`: Indicates the tenancy of the Capacity Reservation. A Capacity Reservation
   can have one of the following tenancy settings:    default - The Capacity Reservation is
@@ -2834,6 +2837,8 @@ all client VPN sessions are terminated.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"ClientConnectOptions"`: The options for managing connection authorization for new
   client connections.
+- `"ClientLoginBannerOptions"`: Options for enabling a customizable text banner that will
+  be displayed on Amazon Web Services provided clients when a VPN session is established.
 - `"ClientToken"`: Unique, case-sensitive identifier that you provide to ensure the
   idempotency of the request. For more information, see How to ensure idempotency.
 - `"Description"`: A brief description of the Client VPN endpoint.
@@ -2847,6 +2852,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   network. You must also specify the ID of the VPC that contains the security groups.
 - `"SelfServicePortal"`: Specify whether to enable the self-service portal for the Client
   VPN endpoint. Default Value: enabled
+- `"SessionTimeoutHours"`: The maximum VPN session duration time in hours. Valid values: 8
+  | 10 | 12 | 24  Default value: 24
 - `"SplitTunnel"`: Indicates whether split-tunnel is enabled on the Client VPN endpoint. By
   default, split-tunnel on a VPN endpoint is disabled. For information about split-tunnel VPN
   endpoints, see Split-tunnel Client VPN endpoint in the Client VPN Administrator Guide.
@@ -3480,11 +3487,16 @@ end
     create_image(instance_id, name, params::Dict{String,<:Any})
 
 Creates an Amazon EBS-backed AMI from an Amazon EBS-backed instance that is either running
-or stopped. If you customized your instance with instance store volumes or Amazon EBS
-volumes in addition to the root device volume, the new AMI contains block device mapping
-information for those volumes. When you launch an instance from this new AMI, the instance
-automatically launches with those additional volumes. For more information, see Creating
-Amazon EBS-Backed Linux AMIs in the Amazon Elastic Compute Cloud User Guide.
+or stopped.  By default, Amazon EC2 shuts down and reboots the instance before creating the
+AMI to ensure that everything on the instance is stopped and in a consistent state during
+the creation process. If you're confident that your instance is in a consistent state
+appropriate for AMI creation, use the NoReboot parameter to prevent Amazon EC2 from
+shutting down and rebooting the instance.   If you customized your instance with instance
+store volumes or Amazon EBS volumes in addition to the root device volume, the new AMI
+contains block device mapping information for those volumes. When you launch an instance
+from this new AMI, the instance automatically launches with those additional volumes. For
+more information, see Creating Amazon EBS-Backed Linux AMIs in the Amazon Elastic Compute
+Cloud User Guide.
 
 # Arguments
 - `instance_id`: The ID of the instance.
@@ -4555,9 +4567,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   idempotency of the request. For more information, see Ensuring Idempotency.
 - `"InterfaceType"`: Indicates the type of network interface. To create an Elastic Fabric
   Adapter (EFA), specify efa. For more information, see  Elastic Fabric Adapter in the Amazon
-  Elastic Compute Cloud User Guide. To create a trunk network interface, specify efa. For
-  more information, see  Network interface trunking in the Amazon Elastic Compute Cloud User
-  Guide.
+  Elastic Compute Cloud User Guide. To create a trunk network interface, specify trunk.
 - `"Ipv4Prefix"`: One or more IPv4 prefixes assigned to the network interface. You cannot
   use this option if you use the Ipv4PrefixCount option.
 - `"Ipv4PrefixCount"`: The number of IPv4 prefixes that Amazon Web Services automatically
@@ -9737,12 +9747,15 @@ end
     deregister_image(image_id, params::Dict{String,<:Any})
 
 Deregisters the specified AMI. After you deregister an AMI, it can't be used to launch new
-instances; however, it doesn't affect any instances that you've already launched from the
-AMI. You'll continue to incur usage costs for those instances until you terminate them.
-When you deregister an Amazon EBS-backed AMI, it doesn't affect the snapshot that was
-created for the root volume of the instance during the AMI creation process. When you
-deregister an instance store-backed AMI, it doesn't affect the files that you uploaded to
-Amazon S3 when you created the AMI.
+instances. If you deregister an AMI that matches a Recycle Bin retention rule, the AMI is
+retained in the Recycle Bin for the specified retention period. For more information, see
+Recycle Bin in the Amazon Elastic Compute Cloud User Guide. When you deregister an AMI, it
+doesn't affect any instances that you've already launched from the AMI. You'll continue to
+incur usage costs for those instances until you terminate them. When you deregister an
+Amazon EBS-backed AMI, it doesn't affect the snapshot that was created for the root volume
+of the instance during the AMI creation process. When you deregister an instance
+store-backed AMI, it doesn't affect the files that you uploaded to Amazon S3 when you
+created the AMI.
 
 # Arguments
 - `image_id`: The ID of the AMI.
@@ -9882,16 +9895,17 @@ end
     describe_account_attributes()
     describe_account_attributes(params::Dict{String,<:Any})
 
-Describes attributes of your AWS account. The following are the supported account
-attributes:    supported-platforms: Indicates whether your account can launch instances
-into EC2-Classic and EC2-VPC, or only into EC2-VPC.    default-vpc: The ID of the default
-VPC for your account, or none.    max-instances: This attribute is no longer supported. The
-returned value does not reflect your actual vCPU limit for running On-Demand Instances. For
-more information, see On-Demand Instance Limits in the Amazon Elastic Compute Cloud User
-Guide.    vpc-max-security-groups-per-interface: The maximum number of security groups that
-you can assign to a network interface.    max-elastic-ips: The maximum number of Elastic IP
-addresses that you can allocate for use with EC2-Classic.     vpc-max-elastic-ips: The
-maximum number of Elastic IP addresses that you can allocate for use with EC2-VPC.
+Describes attributes of your Amazon Web Services account. The following are the supported
+account attributes:    supported-platforms: Indicates whether your account can launch
+instances into EC2-Classic and EC2-VPC, or only into EC2-VPC.    default-vpc: The ID of the
+default VPC for your account, or none.    max-instances: This attribute is no longer
+supported. The returned value does not reflect your actual vCPU limit for running On-Demand
+Instances. For more information, see On-Demand Instance Limits in the Amazon Elastic
+Compute Cloud User Guide.    vpc-max-security-groups-per-interface: The maximum number of
+security groups that you can assign to a network interface.    max-elastic-ips: The maximum
+number of Elastic IP addresses that you can allocate for use with EC2-Classic.
+vpc-max-elastic-ips: The maximum number of Elastic IP addresses that you can allocate for
+use with EC2-VPC.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -10227,32 +10241,32 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
 - `"Filter"`: One or more filters.    instance-type - The type of instance for which the
   Capacity Reservation reserves capacity.    owner-id - The ID of the Amazon Web Services
-  account that owns the Capacity Reservation.    availability-zone-id - The Availability Zone
-  ID of the Capacity Reservation.    instance-platform - The type of operating system for
-  which the Capacity Reservation reserves capacity.    availability-zone - The Availability
-  Zone ID of the Capacity Reservation.    tenancy - Indicates the tenancy of the Capacity
-  Reservation. A Capacity Reservation can have one of the following tenancy settings:
-  default - The Capacity Reservation is created on hardware that is shared with other Amazon
-  Web Services accounts.    dedicated - The Capacity Reservation is created on single-tenant
-  hardware that is dedicated to a single Amazon Web Services account.      outpost-arn - The
-  Amazon Resource Name (ARN) of the Outpost on which the Capacity Reservation was created.
-  state - The current state of the Capacity Reservation. A Capacity Reservation can be in one
-  of the following states:    active- The Capacity Reservation is active and the capacity is
-  available for your use.    expired - The Capacity Reservation expired automatically at the
-  date and time specified in your request. The reserved capacity is no longer available for
-  your use.    cancelled - The Capacity Reservation was cancelled. The reserved capacity is
-  no longer available for your use.    pending - The Capacity Reservation request was
-  successful but the capacity provisioning is still pending.    failed - The Capacity
-  Reservation request has failed. A request might fail due to invalid request parameters,
-  capacity constraints, or instance limit constraints. Failed requests are retained for 60
-  minutes.      start-date - The date and time at which the Capacity Reservation was started.
-     end-date - The date and time at which the Capacity Reservation expires. When a Capacity
-  Reservation expires, the reserved capacity is released and you can no longer launch
-  instances into it. The Capacity Reservation's state changes to expired when it reaches its
-  end date and time.    end-date-type - Indicates the way in which the Capacity Reservation
-  ends. A Capacity Reservation can have one of the following end types:    unlimited - The
-  Capacity Reservation remains active until you explicitly cancel it.    limited - The
-  Capacity Reservation expires automatically at a specified date and time.
+  account that owns the Capacity Reservation.    instance-platform - The type of operating
+  system for which the Capacity Reservation reserves capacity.    availability-zone - The
+  Availability Zone of the Capacity Reservation.    tenancy - Indicates the tenancy of the
+  Capacity Reservation. A Capacity Reservation can have one of the following tenancy
+  settings:    default - The Capacity Reservation is created on hardware that is shared with
+  other Amazon Web Services accounts.    dedicated - The Capacity Reservation is created on
+  single-tenant hardware that is dedicated to a single Amazon Web Services account.
+  outpost-arn - The Amazon Resource Name (ARN) of the Outpost on which the Capacity
+  Reservation was created.    state - The current state of the Capacity Reservation. A
+  Capacity Reservation can be in one of the following states:    active- The Capacity
+  Reservation is active and the capacity is available for your use.    expired - The Capacity
+  Reservation expired automatically at the date and time specified in your request. The
+  reserved capacity is no longer available for your use.    cancelled - The Capacity
+  Reservation was cancelled. The reserved capacity is no longer available for your use.
+  pending - The Capacity Reservation request was successful but the capacity provisioning is
+  still pending.    failed - The Capacity Reservation request has failed. A request might
+  fail due to invalid request parameters, capacity constraints, or instance limit
+  constraints. Failed requests are retained for 60 minutes.      start-date - The date and
+  time at which the Capacity Reservation was started.    end-date - The date and time at
+  which the Capacity Reservation expires. When a Capacity Reservation expires, the reserved
+  capacity is released and you can no longer launch instances into it. The Capacity
+  Reservation's state changes to expired when it reaches its end date and time.
+  end-date-type - Indicates the way in which the Capacity Reservation ends. A Capacity
+  Reservation can have one of the following end types:    unlimited - The Capacity
+  Reservation remains active until you explicitly cancel it.    limited - The Capacity
+  Reservation expires automatically at a specified date and time.
   instance-match-criteria - Indicates the type of instance launches that the Capacity
   Reservation accepts. The options include:    open - The Capacity Reservation accepts all
   instances that have matching attributes (instance type, platform, and Availability Zone).
@@ -10898,6 +10912,44 @@ function describe_export_tasks(
 )
     return ec2(
         "DescribeExportTasks",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    describe_fast_launch_images()
+    describe_fast_launch_images(params::Dict{String,<:Any})
+
+Describe details for Windows AMIs that are configured for faster launching.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"DryRun"`: Checks whether you have the required permissions for the action, without
+  actually making the request, and provides an error response. If you have the required
+  permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
+- `"Filter"`: Use the following filters to streamline results.    resource-type - The
+  resource type for pre-provisioning.    launch-template - The launch template that is
+  associated with the pre-provisioned Windows AMI.    owner-id - The owner ID for the
+  pre-provisioning resource.    state - The current state of fast launching for the Windows
+  AMI.
+- `"ImageId"`: Details for one or more Windows AMI image IDs.
+- `"MaxResults"`: The maximum number of results to return in a single call. To retrieve the
+  remaining results, make another request with the returned NextToken value. If this
+  parameter is not specified, then all results are returned.
+- `"NextToken"`: The token for the next set of results.
+"""
+function describe_fast_launch_images(; aws_config::AbstractAWSConfig=global_aws_config())
+    return ec2(
+        "DescribeFastLaunchImages"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+    )
+end
+function describe_fast_launch_images(
+    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return ec2(
+        "DescribeFastLaunchImages",
         params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -12434,10 +12486,17 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
 - `"Filter"`: One or more filters.    create-time - The time the launch template version
   was created.    ebs-optimized - A boolean that indicates whether the instance is optimized
-  for Amazon EBS I/O.    iam-instance-profile - The ARN of the IAM instance profile.
+  for Amazon EBS I/O.    http-endpoint - Indicates whether the HTTP metadata endpoint on your
+  instances is enabled (enabled | disabled).    http-protocol-ipv4 - Indicates whether the
+  IPv4 endpoint for the instance metadata service is enabled (enabled | disabled).
+  host-resource-group-arn - The ARN of the host resource group in which to launch the
+  instances.    http-tokens - The state of token usage for your instance metadata requests
+  (optional | required).    iam-instance-profile - The ARN of the IAM instance profile.
   image-id - The ID of the AMI.    instance-type - The instance type.    is-default-version -
   A boolean that indicates whether the launch template version is the default version.
-  kernel-id - The kernel ID.    ram-disk-id - The RAM disk ID.
+  kernel-id - The kernel ID.    license-configuration-arn - The ARN of the license
+  configuration.    network-card-index - The index of the network card.    ram-disk-id - The
+  RAM disk ID.
 - `"LaunchTemplateId"`: The ID of the launch template. To describe one or more versions of
   a specified launch template, you must specify either the launch template ID or the launch
   template name in the request. To describe all the latest or default launch template
@@ -13263,14 +13322,15 @@ information, see Placement groups in the Amazon EC2 User Guide.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"Filter"`: The filters.    group-name - The name of the placement group.    state - The
-  state of the placement group (pending | available | deleting | deleted).    strategy - The
-  strategy of the placement group (cluster | spread | partition).    tag:&lt;key&gt; - The
-  key/value combination of a tag assigned to the resource. Use the tag key in the filter name
-  and the tag value as the filter value. For example, to find all resources that have a tag
-  with the key Owner and the value TeamA, specify tag:Owner for the filter name and TeamA for
-  the filter value.    tag-key - The key of a tag assigned to the resource. Use this filter
-  to find all resources that have a tag with a specific key, regardless of the tag value.
+- `"Filter"`: The filters.    group-name - The name of the placement group.    group-arn -
+  The Amazon Resource Name (ARN) of the placement group.    state - The state of the
+  placement group (pending | available | deleting | deleted).    strategy - The strategy of
+  the placement group (cluster | spread | partition).    tag:&lt;key&gt; - The key/value
+  combination of a tag assigned to the resource. Use the tag key in the filter name and the
+  tag value as the filter value. For example, to find all resources that have a tag with the
+  key Owner and the value TeamA, specify tag:Owner for the filter name and TeamA for the
+  filter value.    tag-key - The key of a tag assigned to the resource. Use this filter to
+  find all resources that have a tag with a specific key, regardless of the tag value.
 - `"GroupId"`: The IDs of the placement groups.
 - `"dryRun"`: Checks whether you have the required permissions for the action, without
   actually making the request, and provides an error response. If you have the required
@@ -14114,8 +14174,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
 - `"Filter"`: The filters.    snapshot-id - The snapshot ID.    volume-id - The ID of the
   volume the snapshot is for.    last-tiering-operation - The state of the last archive or
-  restore action. (archiving | archival_error | archival_complete | restoring | restore_error
-  | restore_complete)
+  restore action. (archival-in-progress | archival-completed | archival-failed |
+  permanent-restore-in-progress | permanent-restore-completed | permanent-restore-failed |
+  temporary-restore-in-progress | temporary-restore-completed | temporary-restore-failed)
 - `"MaxResults"`: The maximum number of results to return with a single call. To retrieve
   the remaining results, make another call with the returned nextToken value.
 - `"NextToken"`: The token for the next page of results.
@@ -14544,8 +14605,9 @@ end
     describe_stale_security_groups(vpc_id, params::Dict{String,<:Any})
 
 [VPC only] Describes the stale security group rules for security groups in a specified VPC.
-Rules are stale when they reference a deleted security group in a peer VPC, or a security
-group in a peer VPC for which the VPC peering connection has been deleted.
+Rules are stale when they reference a deleted security group in the same VPC or in a peer
+VPC, or if they reference a security group in a peer VPC for which the VPC peering
+connection has been deleted.
 
 # Arguments
 - `vpc_id`: The ID of the VPC.
@@ -16345,6 +16407,47 @@ function disable_ebs_encryption_by_default(
 end
 
 """
+    disable_fast_launch(image_id)
+    disable_fast_launch(image_id, params::Dict{String,<:Any})
+
+Discontinue faster launching for a Windows AMI, and clean up existing pre-provisioned
+snapshots. When you disable faster launching, the AMI uses the standard launch process for
+each instance. All pre-provisioned snapshots must be removed before you can enable faster
+launching again.  To change these settings, you must own the AMI.
+
+# Arguments
+- `image_id`: The ID of the image for which you’re turning off faster launching, and
+  removing pre-provisioned snapshots.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"DryRun"`: Checks whether you have the required permissions for the action, without
+  actually making the request, and provides an error response. If you have the required
+  permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
+- `"Force"`: Forces the image settings to turn off faster launching for your Windows AMI.
+  This parameter overrides any errors that are encountered while cleaning up resources in
+  your account.
+"""
+function disable_fast_launch(ImageId; aws_config::AbstractAWSConfig=global_aws_config())
+    return ec2(
+        "DisableFastLaunch",
+        Dict{String,Any}("ImageId" => ImageId);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function disable_fast_launch(
+    ImageId, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return ec2(
+        "DisableFastLaunch",
+        Dict{String,Any}(mergewith(_merge, Dict{String,Any}("ImageId" => ImageId), params));
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     disable_fast_snapshot_restores(availability_zone, source_snapshot_id)
     disable_fast_snapshot_restores(availability_zone, source_snapshot_id, params::Dict{String,<:Any})
 
@@ -17196,6 +17299,55 @@ function enable_ebs_encryption_by_default(
     return ec2(
         "EnableEbsEncryptionByDefault",
         params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    enable_fast_launch(image_id)
+    enable_fast_launch(image_id, params::Dict{String,<:Any})
+
+When you enable faster launching for a Windows AMI, images are pre-provisioned, using
+snapshots to launch instances up to 65% faster. To create the optimized Windows image,
+Amazon EC2 launches an instance and runs through Sysprep steps, rebooting as required. Then
+it creates a set of reserved snapshots that are used for subsequent launches. The reserved
+snapshots are automatically replenished as they are used, depending on your settings for
+launch frequency.  To change these settings, you must own the AMI.
+
+# Arguments
+- `image_id`: The ID of the image for which you’re enabling faster launching.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"DryRun"`: Checks whether you have the required permissions for the action, without
+  actually making the request, and provides an error response. If you have the required
+  permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
+- `"LaunchTemplate"`: The launch template to use when launching Windows instances from
+  pre-provisioned snapshots. Launch template parameters can include either the name or ID of
+  the launch template, but not both.
+- `"MaxParallelLaunches"`: The maximum number of parallel instances to launch for creating
+  resources. Value must be 6 or greater.
+- `"ResourceType"`: The type of resource to use for pre-provisioning the Windows AMI for
+  faster launching. Supported values include: snapshot, which is the default value.
+- `"SnapshotConfiguration"`: Configuration settings for creating and managing the snapshots
+  that are used for pre-provisioning the Windows AMI for faster launching. The associated
+  ResourceType must be snapshot.
+"""
+function enable_fast_launch(ImageId; aws_config::AbstractAWSConfig=global_aws_config())
+    return ec2(
+        "EnableFastLaunch",
+        Dict{String,Any}("ImageId" => ImageId);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function enable_fast_launch(
+    ImageId, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return ec2(
+        "EnableFastLaunch",
+        Dict{String,Any}(mergewith(_merge, Dict{String,Any}("ImageId" => ImageId), params));
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
@@ -19528,8 +19680,7 @@ VM Import/Export User Guide.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"Architecture"`: The architecture of the virtual machine. Valid values: i386 | x86_64 |
-  arm64
+- `"Architecture"`: The architecture of the virtual machine. Valid values: i386 | x86_64
 - `"BootMode"`: The boot mode of the virtual machine.
 - `"ClientData"`: The client-specific data.
 - `"ClientToken"`: The token to enable idempotency for VM import requests.
@@ -19796,6 +19947,42 @@ function import_volume(
                 params,
             ),
         );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    list_images_in_recycle_bin()
+    list_images_in_recycle_bin(params::Dict{String,<:Any})
+
+Lists one or more AMIs that are currently in the Recycle Bin. For more information, see
+Recycle Bin in the Amazon Elastic Compute Cloud User Guide.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"DryRun"`: Checks whether you have the required permissions for the action, without
+  actually making the request, and provides an error response. If you have the required
+  permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
+- `"ImageId"`: The IDs of the AMIs to list. Omit this parameter to list all of the AMIs
+  that are in the Recycle Bin. You can specify up to 20 IDs in a single request.
+- `"MaxResults"`: The maximum number of results to return with a single call. To retrieve
+  the remaining results, make another call with the returned nextToken value. If you do not
+  specify a value for MaxResults, the request returns 1,000 items per page by default. For
+  more information, see  Pagination.
+- `"NextToken"`: The token for the next page of results.
+"""
+function list_images_in_recycle_bin(; aws_config::AbstractAWSConfig=global_aws_config())
+    return ec2(
+        "ListImagesInRecycleBin"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+    )
+end
+function list_images_in_recycle_bin(
+    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return ec2(
+        "ListImagesInRecycleBin",
+        params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
@@ -20069,6 +20256,8 @@ connections.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"ClientConnectOptions"`: The options for managing connection authorization for new
   client connections.
+- `"ClientLoginBannerOptions"`: Options for enabling a customizable text banner that will
+  be displayed on Amazon Web Services provided clients when a VPN session is established.
 - `"ConnectionLogOptions"`: Information about the client connection logging options. If you
   enable client connection logging, data about client connections is sent to a Cloudwatch
   Logs log stream. The following information is logged:   Client connection requests   Client
@@ -20086,6 +20275,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   VPN endpoint.
 - `"ServerCertificateArn"`: The ARN of the server certificate to be used. The server
   certificate must be provisioned in Certificate Manager (ACM).
+- `"SessionTimeoutHours"`: The maximum VPN session duration time in hours. Valid values: 8
+  | 10 | 12 | 24  Default value: 24
 - `"SplitTunnel"`: Indicates whether the VPN is split-tunnel. For information about
   split-tunnel VPN endpoints, see Split-tunnel Client VPN endpoint in the Client VPN
   Administrator Guide.
@@ -20931,8 +21122,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   actually making the request, and provides an error response. If you have the required
   permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
 - `"HttpEndpoint"`: Enables or disables the HTTP metadata endpoint on your instances. If
-  the parameter is not specified, the existing state is maintained. If you specify a value of
-  disabled, you cannot access your instance metadata.
+  this parameter is not specified, the existing state is maintained. If you specify a value
+  of disabled, you cannot access your instance metadata.
 - `"HttpProtocolIpv6"`: Enables or disables the IPv6 endpoint for the instance metadata
   service. This setting applies only if you have enabled the HTTP metadata endpoint.
 - `"HttpPutResponseHopLimit"`: The desired HTTP PUT response hop limit for instance
@@ -20948,6 +21139,10 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   required, you must send a signed token header with any instance metadata retrieval
   requests. In this state, retrieving the IAM role credential always returns the version 2.0
   credentials; the version 1.0 credentials are not available.
+- `"InstanceMetadataTags"`: Set to enabled to allow access to instance tags from the
+  instance metadata. Set to disabled to turn off access to instance tags from the instance
+  metadata. For more information, see Work with instance tags using the instance metadata.
+  Default: disabled
 """
 function modify_instance_metadata_options(
     InstanceId; aws_config::AbstractAWSConfig=global_aws_config()
@@ -22975,31 +23170,54 @@ function move_address_to_vpc(
 end
 
 """
-    move_byoip_cidr_to_ipam()
-    move_byoip_cidr_to_ipam(params::Dict{String,<:Any})
+    move_byoip_cidr_to_ipam(cidr, ipam_pool_id, ipam_pool_owner)
+    move_byoip_cidr_to_ipam(cidr, ipam_pool_id, ipam_pool_owner, params::Dict{String,<:Any})
 
 Move an BYOIP IPv4 CIDR to IPAM from a public IPv4 pool.
 
+# Arguments
+- `cidr`: The BYOIP CIDR.
+- `ipam_pool_id`: The IPAM pool ID.
+- `ipam_pool_owner`: The Amazon Web Services account ID of the owner of the IPAM pool.
+
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"Cidr"`: The BYOIP CIDR.
 - `"DryRun"`: A check for whether you have the required permissions for the action without
   actually making the request and provides an error response. If you have the required
   permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
-- `"IpamPoolId"`: The IPAM pool ID.
-- `"IpamPoolOwner"`: The Amazon Web Services account ID of the owner of the IPAM pool.
 """
-function move_byoip_cidr_to_ipam(; aws_config::AbstractAWSConfig=global_aws_config())
-    return ec2(
-        "MoveByoipCidrToIpam"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
-    )
-end
 function move_byoip_cidr_to_ipam(
-    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+    Cidr, IpamPoolId, IpamPoolOwner; aws_config::AbstractAWSConfig=global_aws_config()
 )
     return ec2(
         "MoveByoipCidrToIpam",
-        params;
+        Dict{String,Any}(
+            "Cidr" => Cidr, "IpamPoolId" => IpamPoolId, "IpamPoolOwner" => IpamPoolOwner
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function move_byoip_cidr_to_ipam(
+    Cidr,
+    IpamPoolId,
+    IpamPoolOwner,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return ec2(
+        "MoveByoipCidrToIpam",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}(
+                    "Cidr" => Cidr,
+                    "IpamPoolId" => IpamPoolId,
+                    "IpamPoolOwner" => IpamPoolOwner,
+                ),
+                params,
+            ),
+        );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
@@ -24846,6 +25064,43 @@ function restore_address_to_classic(
         Dict{String,Any}(
             mergewith(_merge, Dict{String,Any}("publicIp" => publicIp), params)
         );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    restore_image_from_recycle_bin(image_id)
+    restore_image_from_recycle_bin(image_id, params::Dict{String,<:Any})
+
+Restores an AMI from the Recycle Bin. For more information, see Recycle Bin in the Amazon
+Elastic Compute Cloud User Guide.
+
+# Arguments
+- `image_id`: The ID of the AMI to restore.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"DryRun"`: Checks whether you have the required permissions for the action, without
+  actually making the request, and provides an error response. If you have the required
+  permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
+"""
+function restore_image_from_recycle_bin(
+    ImageId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return ec2(
+        "RestoreImageFromRecycleBin",
+        Dict{String,Any}("ImageId" => ImageId);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function restore_image_from_recycle_bin(
+    ImageId, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return ec2(
+        "RestoreImageFromRecycleBin",
+        Dict{String,Any}(mergewith(_merge, Dict{String,Any}("ImageId" => ImageId), params));
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )

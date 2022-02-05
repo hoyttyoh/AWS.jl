@@ -207,7 +207,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   automatically generates a client token and uses it for the request to ensure idempotency.
 - `"ec2InstanceType"`: The EC2 Instance type used for the streaming session.
 - `"launchProfileId"`: The launch profile ID.
-- `"ownedBy"`: The user ID of the user that owns the streaming session.
+- `"ownedBy"`: The user ID of the user that owns the streaming session. The user that owns
+  the session will be logging into the session and interacting with the virtual workstation.
 - `"streamingImageId"`: The ID of the streaming image.
 - `"tags"`: A collection of labels, in the form of key:value pairs, that apply to this
   resource.
@@ -1017,7 +1018,7 @@ end
     get_streaming_session(session_id, studio_id)
     get_streaming_session(session_id, studio_id, params::Dict{String,<:Any})
 
-Gets StreamingSession resource. anvoke this operation to poll for a streaming session state
+Gets StreamingSession resource. Invoke this operation to poll for a streaming session state
 while creating or deleting a session.
 
 # Arguments

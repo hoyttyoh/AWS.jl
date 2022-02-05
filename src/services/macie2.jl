@@ -187,10 +187,18 @@ function create_classification_job(
 end
 
 """
-    create_custom_data_identifier()
-    create_custom_data_identifier(params::Dict{String,<:Any})
+    create_custom_data_identifier(name, regex)
+    create_custom_data_identifier(name, regex, params::Dict{String,<:Any})
 
 Creates and defines the criteria and other settings for a custom data identifier.
+
+# Arguments
+- `name`: A custom name for the custom data identifier. The name can contain as many as 128
+  characters. We strongly recommend that you avoid including any sensitive data in the name
+  of a custom data identifier. Other users of your account might be able to see this name,
+  depending on the actions that they're allowed to perform in Amazon Macie.
+- `regex`: The regular expression (regex) that defines the pattern to match. The expression
+  can contain as many as 512 characters.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -214,12 +222,6 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   array. Amazon Macie includes or excludes a result based on the proximity of a keyword to
   text that matches the regular expression. The distance can be 1-300 characters. The default
   value is 50.
-- `"name"`: A custom name for the custom data identifier. The name can contain as many as
-  128 characters. We strongly recommend that you avoid including any sensitive data in the
-  name of a custom data identifier. Other users of your account might be able to see this
-  name, depending on the actions that they're allowed to perform in Amazon Macie.
-- `"regex"`: The regular expression (regex) that defines the pattern to match. The
-  expression can contain as many as 512 characters.
 - `"severityLevels"`: The severity to assign to findings that the custom data identifier
   produces, based on the number of occurrences of text that matches the custom data
   identifier's detection criteria. You can specify as many as three SeverityLevel objects in
@@ -235,23 +237,36 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   of a tag key and an associated tag value. The maximum length of a tag key is 128
   characters. The maximum length of a tag value is 256 characters.
 """
-function create_custom_data_identifier(; aws_config::AbstractAWSConfig=global_aws_config())
-    return macie2(
-        "POST",
-        "/custom-data-identifiers",
-        Dict{String,Any}("clientToken" => string(uuid4()));
-        aws_config=aws_config,
-        feature_set=SERVICE_FEATURE_SET,
-    )
-end
 function create_custom_data_identifier(
-    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+    name, regex; aws_config::AbstractAWSConfig=global_aws_config()
 )
     return macie2(
         "POST",
         "/custom-data-identifiers",
         Dict{String,Any}(
-            mergewith(_merge, Dict{String,Any}("clientToken" => string(uuid4())), params)
+            "name" => name, "regex" => regex, "clientToken" => string(uuid4())
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function create_custom_data_identifier(
+    name,
+    regex,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return macie2(
+        "POST",
+        "/custom-data-identifiers",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}(
+                    "name" => name, "regex" => regex, "clientToken" => string(uuid4())
+                ),
+                params,
+            ),
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,

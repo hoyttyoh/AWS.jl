@@ -55,9 +55,9 @@ Store parameters, Amazon S3 objects, or any integration source action supported 
 CodePipeline. A configuration profile includes the following information:   The URI
 location of the configuration data.   The Identity and Access Management (IAM) role that
 provides access to the configuration data.   A validator for the configuration data.
-Available validators include either a JSON Schema or an Lambda function.   For more
-information, see Create a Configuration and a Configuration Profile in the AppConfig User
-Guide.
+Available validators include either a JSON Schema or an Amazon Web Services Lambda
+function.   For more information, see Create a Configuration and a Configuration Profile in
+the AppConfig User Guide.
 
 # Arguments
 - `application_id`: The application ID.
@@ -82,9 +82,11 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"Tags"`: Metadata to assign to the configuration profile. Tags help organize and
   categorize your AppConfig resources. Each tag consists of a key and an optional value, both
   of which you define.
-- `"Type"`: The type of configurations that the configuration profile contains. A
-  configuration can be a feature flag used for enabling or disabling new features or a
-  free-form configuration used for distributing configurations to your application.
+- `"Type"`: The type of configurations contained in the profile. AppConfig supports feature
+  flags and freeform configurations. We recommend you create feature flag configurations to
+  enable or disable new features and freeform configurations to distribute configurations to
+  an application. When calling this API, enter one of the following values for Type:
+  AWS.AppConfig.FeatureFlags   AWS.Freeform
 - `"Validators"`: A list of methods for validating the configuration.
 """
 function create_configuration_profile(
@@ -543,14 +545,20 @@ end
     get_configuration(application, configuration, environment, client_id)
     get_configuration(application, configuration, environment, client_id, params::Dict{String,<:Any})
 
-Retrieves information about a configuration.  AppConfig uses the value of the
+Retrieves the latest deployed configuration.  Note the following important information.
+This API action has been deprecated. Calls to receive configuration data should use the
+StartConfigurationSession and GetLatestConfiguration APIs instead.     GetConfiguration is
+a priced call. For more information, see Pricing.   AppConfig uses the value of the
 ClientConfigurationVersion parameter to identify the configuration version on your clients.
 If you don’t send ClientConfigurationVersion with each call to GetConfiguration, your
 clients receive the current configuration. You are charged each time your clients receive a
-configuration. To avoid excess charges, we recommend that you include the
-ClientConfigurationVersion value with every call to GetConfiguration. This value must be
-saved on your client. Subsequent calls to GetConfiguration must pass this value by using
-the ClientConfigurationVersion parameter.
+configuration. To avoid excess charges, we recommend you use the StartConfigurationSession
+and GetLatestConfiguration APIs, which track the client configuration version on your
+behalf. If you choose to continue using GetConfiguration, we recommend that you include the
+ClientConfigurationVersion value with every call to GetConfiguration. The value to use for
+ClientConfigurationVersion comes from the ConfigurationVersion attribute returned by
+GetConfiguration when there is new or updated data, and should be saved for subsequent
+calls to GetConfiguration.
 
 # Arguments
 - `application`: The application to get. Specify either the application name or the
@@ -855,7 +863,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   returns a token that you can specify in a subsequent call to get the next set of results.
 - `"next_token"`: A token to start the list. Use this token to get the next set of results.
 - `"type"`: A filter based on the type of configurations that the configuration profile
-  contains. A configuration can be a feature flag or a free-form configuration.
+  contains. A configuration can be a feature flag or a freeform configuration.
 """
 function list_configuration_profiles(
     ApplicationId; aws_config::AbstractAWSConfig=global_aws_config()
@@ -917,7 +925,7 @@ end
     list_deployments(application_id, environment_id)
     list_deployments(application_id, environment_id, params::Dict{String,<:Any})
 
-Lists the deployments for an environment.
+Lists the deployments for an environment in descending deployment number order.
 
 # Arguments
 - `application_id`: The application ID.
@@ -925,9 +933,12 @@ Lists the deployments for an environment.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"max_results"`: The maximum number of items to return for this call. The call also
-  returns a token that you can specify in a subsequent call to get the next set of results.
-- `"next_token"`: A token to start the list. Use this token to get the next set of results.
+- `"max_results"`: The maximum number of items that may be returned for this call. If there
+  are items that have not yet been returned, the response will include a non-null NextToken
+  that you can provide in a subsequent call to get the next set of results.
+- `"next_token"`: The token returned by a prior call to this operation indicating the next
+  set of results to be returned. If not specified, the operation will return the first set of
+  results.
 """
 function list_deployments(
     ApplicationId, EnvironmentId; aws_config::AbstractAWSConfig=global_aws_config()

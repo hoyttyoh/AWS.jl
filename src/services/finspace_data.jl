@@ -22,15 +22,26 @@ Creates a new Changeset in a FinSpace Dataset.
   format type (formatType), header row (withHeader), data separation character (separator)
   and the type of compression (compression).   formatType is a required attribute and can
   have the following values:     PARQUET - Parquet source file format.    CSV - CSV source
-  file format.    JSON - JSON source file format.    XML - XML source file format.    For
-  example, you could specify the following for formatParams:  \"formatParams\": {
-  \"formatType\": \"CSV\", \"withHeader\": \"true\", \"separator\": \",\",
-  \"compression\":\"None\" }
-- `source_params`: Options that define the location of the data being ingested.
+  file format.    JSON - JSON source file format.    XML - XML source file format.   Here is
+  an example of how you could specify the formatParams:   \"formatParams\": { \"formatType\":
+  \"CSV\", \"withHeader\": \"true\", \"separator\": \",\", \"compression\":\"None\" }   Note
+  that if you only provide formatType as CSV, the rest of the attributes will automatically
+  default to CSV values as following:   { \"withHeader\": \"true\", \"separator\": \",\" }
+  For more information about supported file formats, see Supported Data Types and File
+  Formats in the FinSpace User Guide.
+- `source_params`: Options that define the location of the data being ingested
+  (s3SourcePath) and the source of the changeset (sourceType). Both s3SourcePath and
+  sourceType are required attributes. Here is an example of how you could specify the
+  sourceParams:   \"sourceParams\": { \"s3SourcePath\":
+  \"s3://finspace-landing-us-east-2-bk7gcfvitndqa6ebnvys4d/scratch/wr5hh8pwkpqqkxa4sxrmcw/inge
+  stion/equity.csv\", \"sourceType\": \"S3\" }   The S3 path that you specify must allow the
+  FinSpace role access. To do that, you first need to configure the IAM policy on S3 bucket.
+  For more information, see Loading data from an Amazon S3 Bucket using the FinSpace
+  APIsection.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"clientToken"`: A token used to ensure idempotency.
+- `"clientToken"`: A token that ensures idempotency. This token expires in 10 minutes.
 """
 function create_changeset(
     changeType,
@@ -96,7 +107,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM
   UTC is specified as 1635768000000.
 - `"autoUpdate"`: Flag to indicate Dataview should be updated automatically.
-- `"clientToken"`: A token used to ensure idempotency.
+- `"clientToken"`: A token that ensures idempotency. This token expires in 10 minutes.
 - `"partitionColumns"`: Ordered set of column names used to partition data.
 - `"sortColumns"`: Columns to be used for sorting the data.
 """
@@ -153,7 +164,7 @@ Creates a new FinSpace Dataset.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"alias"`: The unique resource identifier for a Dataset.
-- `"clientToken"`: A token used to ensure idempotency.
+- `"clientToken"`: A token that ensures idempotency. This token expires in 10 minutes.
 - `"datasetDescription"`: Description of a Dataset.
 - `"ownerInfo"`: Contact information for a Dataset owner.
 - `"schemaDefinition"`: Definition for a schema on a tabular Dataset.
@@ -215,7 +226,7 @@ Deletes a FinSpace Dataset.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"clientToken"`: A token used to ensure idempotency.
+- `"clientToken"`: A token that ensures idempotency. This token expires in 10 minutes.
 """
 function delete_dataset(datasetId; aws_config::AbstractAWSConfig=global_aws_config())
     return finspace_data(
@@ -526,12 +537,30 @@ Updates a FinSpace Changeset.
 - `changeset_id`: The unique identifier for the Changeset to update.
 - `dataset_id`: The unique identifier for the FinSpace Dataset in which the Changeset is
   created.
-- `format_params`: Options that define the structure of the source file(s).
-- `source_params`: Options that define the location of the data being ingested.
+- `format_params`: Options that define the structure of the source file(s) including the
+  format type (formatType), header row (withHeader), data separation character (separator)
+  and the type of compression (compression).   formatType is a required attribute and can
+  have the following values:     PARQUET - Parquet source file format.    CSV - CSV source
+  file format.    JSON - JSON source file format.    XML - XML source file format.   Here is
+  an example of how you could specify the formatParams:   \"formatParams\": { \"formatType\":
+  \"CSV\", \"withHeader\": \"true\", \"separator\": \",\", \"compression\":\"None\" }   Note
+  that if you only provide formatType as CSV, the rest of the attributes will automatically
+  default to CSV values as following:   { \"withHeader\": \"true\", \"separator\": \",\" }
+  For more information about supported file formats, see Supported Data Types and File
+  Formats in the FinSpace User Guide.
+- `source_params`: Options that define the location of the data being ingested
+  (s3SourcePath) and the source of the changeset (sourceType). Both s3SourcePath and
+  sourceType are required attributes. Here is an example of how you could specify the
+  sourceParams:   \"sourceParams\": { \"s3SourcePath\":
+  \"s3://finspace-landing-us-east-2-bk7gcfvitndqa6ebnvys4d/scratch/wr5hh8pwkpqqkxa4sxrmcw/inge
+  stion/equity.csv\", \"sourceType\": \"S3\" }   The S3 path that you specify must allow the
+  FinSpace role access. To do that, you first need to configure the IAM policy on S3 bucket.
+  For more information, see Loading data from an Amazon S3 Bucket using the FinSpace
+  APIsection.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"clientToken"`: A token used to ensure idempotency.
+- `"clientToken"`: A token that ensures idempotency. This token expires in 10 minutes.
 """
 function update_changeset(
     changesetId,
@@ -595,7 +624,7 @@ Updates a FinSpace Dataset.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"alias"`: The unique resource identifier for a Dataset.
-- `"clientToken"`: A token used to ensure idempotency.
+- `"clientToken"`: A token that ensures idempotency. This token expires in 10 minutes.
 - `"datasetDescription"`: A description for the Dataset.
 - `"schemaDefinition"`: Definition for a schema on a tabular Dataset.
 """

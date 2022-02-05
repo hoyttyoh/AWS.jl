@@ -930,6 +930,49 @@ function delete_multicast_group(
 end
 
 """
+    delete_queued_messages(id, message_id)
+    delete_queued_messages(id, message_id, params::Dict{String,<:Any})
+
+ The operation to delete queued messages.
+
+# Arguments
+- `id`: Id of a given wireless device which messages will be deleted
+- `message_id`: if messageID==\"*\", the queue for a particular wireless deviceId will be
+  purged, otherwise, the specific message with messageId will be deleted
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"WirelessDeviceType"`: The wireless device type, it is either Sidewalk or LoRaWAN.
+"""
+function delete_queued_messages(
+    Id, messageId; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return iot_wireless(
+        "DELETE",
+        "/wireless-devices/$(Id)/data",
+        Dict{String,Any}("messageId" => messageId);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function delete_queued_messages(
+    Id,
+    messageId,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return iot_wireless(
+        "DELETE",
+        "/wireless-devices/$(Id)/data",
+        Dict{String,Any}(
+            mergewith(_merge, Dict{String,Any}("messageId" => messageId), params)
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     delete_service_profile(id)
     delete_service_profile(id, params::Dict{String,<:Any})
 
@@ -2157,6 +2200,42 @@ function list_partner_accounts(
     return iot_wireless(
         "GET",
         "/partner-accounts",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    list_queued_messages(id)
+    list_queued_messages(id, params::Dict{String,<:Any})
+
+The operation to list queued messages.
+
+# Arguments
+- `id`: Id of a given wireless device which the downlink packets are targeted
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"WirelessDeviceType"`: The wireless device type, it is either Sidewalk or LoRaWAN.
+- `"maxResults"`: The maximum number of results to return in this operation.
+- `"nextToken"`: To retrieve the next set of results, the nextToken value from a previous
+  response; otherwise null to receive the first set of results.
+"""
+function list_queued_messages(Id; aws_config::AbstractAWSConfig=global_aws_config())
+    return iot_wireless(
+        "GET",
+        "/wireless-devices/$(Id)/data";
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function list_queued_messages(
+    Id, params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return iot_wireless(
+        "GET",
+        "/wireless-devices/$(Id)/data",
         params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,

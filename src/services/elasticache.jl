@@ -378,7 +378,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge,
   cache.m5.24xlarge   M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge,
   cache.m4.4xlarge, cache.m4.10xlarge   T4g node types (available only for Redis engine
-  version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro,
+  version 6.0 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro,
   cache.t4g.small, cache.t4g.medium   T3 node types: cache.t3.micro, cache.t3.small,
   cache.t3.medium   T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium
   Previous generation: (not recommended)  T1 node types: cache.t1.micro   M1 node types:
@@ -449,7 +449,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"PreferredMaintenanceWindow"`: Specifies the weekly time range during which maintenance
   on the cluster is performed. It is specified as a range in the format
   ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute
-  period. Valid values for ddd are:
+  period.
 - `"PreferredOutpostArn"`: The outpost ARN in which the cache cluster is created.
 - `"PreferredOutpostArns"`: The outpost ARNs in which the cache cluster is created.
 - `"ReplicationGroupId"`: The ID of the replication group to which this cluster should
@@ -522,7 +522,7 @@ Groups in the ElastiCache User Guide.
 # Arguments
 - `cache_parameter_group_family`: The name of the cache parameter group family that the
   cache parameter group can be used with. Valid values are: memcached1.4 | memcached1.5 |
-  memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.0 | redis6.2
+  memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x
 - `cache_parameter_group_name`: A user-specified name for the cache parameter group.
 - `description`: A user-specified description for the cache parameter group.
 
@@ -823,7 +823,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge,
   cache.m5.24xlarge   M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge,
   cache.m4.4xlarge, cache.m4.10xlarge   T4g node types (available only for Redis engine
-  version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro,
+  version 6.0 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro,
   cache.t4g.small, cache.t4g.medium   T3 node types: cache.t3.micro, cache.t3.small,
   cache.t3.medium   T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium
   Previous generation: (not recommended)  T1 node types: cache.t1.micro   M1 node types:
@@ -2104,8 +2104,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Supported Node Types    M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge,
   cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge   M4 node types: cache.m4.large,
   cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge   T4g node types
-  (available only for Redis engine version 5.0.6 onward and for Memcached engine version
-  1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium   T3 node types:
+  (available only for Redis engine version 6.0 onward and for Memcached engine version 1.5.16
+  onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium   T3 node types:
   cache.t3.micro, cache.t3.small, cache.t3.medium   T2 node types: cache.t2.micro,
   cache.t2.small, cache.t2.medium    Previous generation: (not recommended)  T1 node types:
   cache.t1.micro   M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large,
@@ -2183,8 +2183,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Supported Node Types    M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge,
   cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge   M4 node types: cache.m4.large,
   cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge   T4g node types
-  (available only for Redis engine version 5.0.6 onward and for Memcached engine version
-  1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium   T3 node types:
+  (available only for Redis engine version 6.0 onward and for Memcached engine version 1.5.16
+  onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium   T3 node types:
   cache.t3.micro, cache.t3.small, cache.t3.medium   T2 node types: cache.t2.micro,
   cache.t2.small, cache.t2.medium    Previous generation: (not recommended)  T1 node types:
   cache.t1.micro   M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large,

@@ -132,6 +132,9 @@ correct region.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"name"`: Recording-configuration name. The value does not need to be unique.
 - `"tags"`: Array of 1-50 maps, each of the form string:string (key:value).
+- `"thumbnailConfiguration"`: A complex type that allows you to enable/disable the
+  recording of thumbnails for a live session and modify the interval at which thumbnails are
+  generated for the live session.
 """
 function create_recording_configuration(
     destinationConfiguration; aws_config::AbstractAWSConfig=global_aws_config()

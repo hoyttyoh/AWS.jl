@@ -319,16 +319,16 @@ end
     calculate_route(calculator_name, departure_position, destination_position)
     calculate_route(calculator_name, departure_position, destination_position, params::Dict{String,<:Any})
 
- Calculates a route given the following required parameters: DeparturePostiton and
+ Calculates a route given the following required parameters: DeparturePosition and
 DestinationPosition. Requires that you first create a route calculator resource. By
 default, a request that doesn't specify a departure time uses the best time of day to
 travel with the best traffic conditions when calculating the route. Additional options
-include:    Specifying a departure time using either DepartureTime or DepartureNow. This
+include:    Specifying a departure time using either DepartureTime or DepartNow. This
 calculates a route based on predictive traffic data at the given time.   You can't specify
-both DepartureTime and DepartureNow in a single request. Specifying both parameters returns
-a validation error.     Specifying a travel mode using TravelMode. This lets you specify an
-additional route preference such as CarModeOptions if traveling by Car, or TruckModeOptions
-if traveling by Truck.
+both DepartureTime and DepartNow in a single request. Specifying both parameters returns a
+validation error.     Specifying a travel mode using TravelMode sets the transportation
+mode used to calculate the routes. This also lets you specify additional route preferences
+in CarModeOptions if traveling by Car, or TruckModeOptions if traveling by Truck.
 
 # Arguments
 - `calculator_name`: The name of the route calculator resource that you want to use to
@@ -359,7 +359,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"IncludeLegGeometry"`: Set to include the geometry details in the result for each path
   between a pair of positions. Default Value: false  Valid Values: false | true
 - `"TravelMode"`: Specifies the mode of transport when calculating a route. Used in
-  estimating the speed of travel and road compatibility. The TravelMode you specify
+  estimating the speed of travel and road compatibility. The TravelMode you specify also
   determines how you specify route preferences:    If traveling by Car use the CarModeOptions
   parameter.   If traveling by Truck use the TruckModeOptions parameter.   Default Value: Car
 - `"TruckModeOptions"`: Specifies route preferences when traveling by Truck, such as
@@ -418,6 +418,115 @@ function calculate_route(
 end
 
 """
+    calculate_route_matrix(calculator_name, departure_positions, destination_positions)
+    calculate_route_matrix(calculator_name, departure_positions, destination_positions, params::Dict{String,<:Any})
+
+  Calculates a route matrix given the following required parameters: DeparturePositions and
+DestinationPositions. CalculateRouteMatrix calculates routes and returns the travel time
+and travel distance from each departure position to each destination position in the
+request. For example, given departure positions A and B, and destination positions X and Y,
+CalculateRouteMatrix will return time and distance for routes from A to X, A to Y, B to X,
+and B to Y (in that order). The number of results returned (and routes calculated) will be
+the number of DeparturePositions times the number of DestinationPositions.  Your account is
+charged for each route calculated, not the number of requests.  Requires that you first
+create a route calculator resource. By default, a request that doesn't specify a departure
+time uses the best time of day to travel with the best traffic conditions when calculating
+routes. Additional options include:     Specifying a departure time using either
+DepartureTime or DepartNow. This calculates routes based on predictive traffic data at the
+given time.   You can't specify both DepartureTime and DepartNow in a single request.
+Specifying both parameters returns a validation error.     Specifying a travel mode using
+TravelMode sets the transportation mode used to calculate the routes. This also lets you
+specify additional route preferences in CarModeOptions if traveling by Car, or
+TruckModeOptions if traveling by Truck.
+
+# Arguments
+- `calculator_name`: The name of the route calculator resource that you want to use to
+  calculate the route matrix.
+- `departure_positions`: The list of departure (origin) positions for the route matrix. An
+  array of points, each of which is itself a 2-value array defined in WGS 84 format:
+  [longitude, latitude]. For example, [-123.115, 49.285].  Depending on the data provider
+  selected in the route calculator resource there may be additional restrictions on the
+  inputs you can choose. See  Position restrictions in the Amazon Location Service Developer
+  Guide.   For route calculators that use Esri as the data provider, if you specify a
+  departure that's not located on a road, Amazon Location  moves the position to the nearest
+  road. The snapped value is available in the result in SnappedDeparturePositions.  Valid
+  Values: [-180 to 180,-90 to 90]
+- `destination_positions`: The list of destination positions for the route matrix. An array
+  of points, each of which is itself a 2-value array defined in WGS 84 format: [longitude,
+  latitude]. For example, [-122.339, 47.615]   Depending on the data provider selected in the
+  route calculator resource there may be additional restrictions on the inputs you can
+  choose. See  Position restrictions in the Amazon Location Service Developer Guide.   For
+  route calculators that use Esri as the data provider, if you specify a destination that's
+  not located on a road, Amazon Location  moves the position to the nearest road. The snapped
+  value is available in the result in SnappedDestinationPositions.  Valid Values: [-180 to
+  180,-90 to 90]
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"CarModeOptions"`: Specifies route preferences when traveling by Car, such as avoiding
+  routes that use ferries or tolls. Requirements: TravelMode must be specified as Car.
+- `"DepartNow"`: Sets the time of departure as the current time. Uses the current time to
+  calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is
+  set, the best time of day to travel with the best traffic conditions is used to calculate
+  the route matrix. Default Value: false  Valid Values: false | true
+- `"DepartureTime"`: Specifies the desired time of departure. Uses the given time to
+  calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is
+  set, the best time of day to travel with the best traffic conditions is used to calculate
+  the route matrix.  Setting a departure time in the past returns a 400 ValidationException
+  error.    In ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example,
+  2020–07-2T12:15:20.000Z+01:00
+- `"DistanceUnit"`: Set the unit system to specify the distance. Default Value: Kilometers
+- `"TravelMode"`: Specifies the mode of transport when calculating a route. Used in
+  estimating the speed of travel and road compatibility. The TravelMode you specify also
+  determines how you specify route preferences:    If traveling by Car use the CarModeOptions
+  parameter.   If traveling by Truck use the TruckModeOptions parameter.   Default Value: Car
+- `"TruckModeOptions"`: Specifies route preferences when traveling by Truck, such as
+  avoiding routes that use ferries or tolls, and truck specifications to consider when
+  choosing an optimal road. Requirements: TravelMode must be specified as Truck.
+"""
+function calculate_route_matrix(
+    CalculatorName,
+    DeparturePositions,
+    DestinationPositions;
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return location(
+        "POST",
+        "/routes/v0/calculators/$(CalculatorName)/calculate/route-matrix",
+        Dict{String,Any}(
+            "DeparturePositions" => DeparturePositions,
+            "DestinationPositions" => DestinationPositions,
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function calculate_route_matrix(
+    CalculatorName,
+    DeparturePositions,
+    DestinationPositions,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return location(
+        "POST",
+        "/routes/v0/calculators/$(CalculatorName)/calculate/route-matrix",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}(
+                    "DeparturePositions" => DeparturePositions,
+                    "DestinationPositions" => DestinationPositions,
+                ),
+                params,
+            ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     create_geofence_collection(collection_name)
     create_geofence_collection(collection_name, params::Dict{String,<:Any})
 
@@ -434,15 +543,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"Description"`: An optional description for the geofence collection.
 - `"KmsKeyId"`: A key identifier for an AWS KMS customer managed key. Enter a key ID, key
   ARN, alias name, or alias ARN.
-- `"PricingPlan"`: Optionally specifies the pricing plan for the geofence collection.
-  Defaults to RequestBasedUsage. For additional details and restrictions on each pricing plan
-  option, see the Amazon Location Service pricing page.
-- `"PricingPlanDataSource"`: Specifies the data provider for the geofence collection.
-  Required value for the following pricing plans: MobileAssetTracking | MobileAssetManagement
-     For more information about Data Providers, and Pricing plans, see the Amazon Location
-  Service product page.  Amazon Location Service only uses PricingPlanDataSource to calculate
-  billing for your geofence collection. Your data won't be shared with the data provider, and
-  will remain in your AWS account or Region unless you move it.  Valid Values: Esri | Here
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
+- `"PricingPlanDataSource"`: This parameter is no longer used.
 - `"Tags"`: Applies one or more tags to the geofence collection. A tag is a key-value pair
   helps manage, identify, search, and filter your resources by labelling them. Format:
   \"key\" : \"value\"  Restrictions:   Maximum 50 tags per resource   Each resource tag must
@@ -483,7 +585,10 @@ end
     create_map(configuration, map_name, params::Dict{String,<:Any})
 
 Creates a map resource in your AWS account, which provides map tiles of different styles
-sourced from global location data providers.
+sourced from global location data providers.  If your application is tracking or routing
+assets you use in your business, such as delivery vehicles or employees, you may only use
+HERE as your geolocation provider. See section 82 of the AWS service terms for more
+details.
 
 # Arguments
 - `configuration`: Specifies the map style selected from an available data provider.
@@ -494,9 +599,7 @@ sourced from global location data providers.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"Description"`: An optional description for the map resource.
-- `"PricingPlan"`: Optionally specifies the pricing plan for the map resource. Defaults to
-  RequestBasedUsage. For additional details and restrictions on each pricing plan option, see
-  Amazon Location Service pricing.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
 - `"Tags"`: Applies one or more tags to the map resource. A tag is a key-value pair helps
   manage, identify, search, and filter your resources by labelling them. Format: \"key\" :
   \"value\"  Restrictions:   Maximum 50 tags per resource   Each resource tag must be unique
@@ -544,7 +647,10 @@ end
 Creates a place index resource in your AWS account. Use a place index resource to geocode
 addresses and other text queries by using the SearchPlaceIndexForText operation, and
 reverse geocode coordinates by using the SearchPlaceIndexForPosition operation, and enable
-autosuggestions by using the SearchPlaceIndexForSuggestions operation.
+autosuggestions by using the SearchPlaceIndexForSuggestions operation.  If your application
+is tracking or routing assets you use in your business, such as delivery vehicles or
+employees, you may only use HERE as your geolocation provider. See section 82 of the AWS
+service terms for more details.
 
 # Arguments
 - `data_source`: Specifies the geospatial data provider for the new place index.  This
@@ -565,9 +671,7 @@ autosuggestions by using the SearchPlaceIndexForSuggestions operation.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"DataSourceConfiguration"`: Specifies the data storage option requesting Places.
 - `"Description"`: The optional description for the place index resource.
-- `"PricingPlan"`: Optionally specifies the pricing plan for the place index resource.
-  Defaults to RequestBasedUsage. For additional details and restrictions on each pricing plan
-  option, see Amazon Location Service pricing.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
 - `"Tags"`: Applies one or more tags to the place index resource. A tag is a key-value pair
   that helps you manage, identify, search, and filter your resources. Format: \"key\" :
   \"value\"  Restrictions:   Maximum 50 tags per resource.   Each tag key must be unique and
@@ -614,7 +718,10 @@ end
 
 Creates a route calculator resource in your AWS account. You can send requests to a route
 calculator resource to estimate travel time, distance, and get directions. A route
-calculator sources traffic and road network data from your chosen data provider.
+calculator sources traffic and road network data from your chosen data provider.  If your
+application is tracking or routing assets you use in your business, such as delivery
+vehicles or employees, you may only use HERE as your geolocation provider. See section 82
+of the AWS service terms for more details.
 
 # Arguments
 - `calculator_name`: The name of the route calculator resource.  Requirements:   Can use
@@ -633,9 +740,7 @@ calculator sources traffic and road network data from your chosen data provider.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"Description"`: The optional description for the route calculator resource.
-- `"PricingPlan"`: Optionally specifies the pricing plan for the route calculator resource.
-  Defaults to RequestBasedUsage. For additional details and restrictions on each pricing plan
-  option, see Amazon Location Service pricing.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
 - `"Tags"`: Applies one or more tags to the route calculator resource. A tag is a key-value
   pair helps manage, identify, search, and filter your resources by labelling them.   For
   example: { \"tag1\" : \"value1\", \"tag2\" : \"value2\"}   Format: \"key\" : \"value\"
@@ -712,15 +817,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   stored. This can reduce the effects of GPS noise when displaying device trajectories on a
   map, and can help control your costs by reducing the number of geofence evaluations.
   This field is optional. If not specified, the default value is TimeBased.
-- `"PricingPlan"`: Optionally specifies the pricing plan for the tracker resource. Defaults
-  to RequestBasedUsage. For additional details and restrictions on each pricing plan option,
-  see Amazon Location Service pricing.
-- `"PricingPlanDataSource"`: Specifies the data provider for the tracker resource.
-  Required value for the following pricing plans: MobileAssetTracking | MobileAssetManagement
-     For more information about Data Providers, and Pricing plans, see the Amazon Location
-  Service product page.  Amazon Location Service only uses PricingPlanDataSource to calculate
-  billing for your tracker resource. Your data will not be shared with the data provider, and
-  will remain in your AWS account or Region unless you move it.  Valid values: Esri | Here
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
+- `"PricingPlanDataSource"`: This parameter is no longer used.
 - `"Tags"`: Applies one or more tags to the tracker resource. A tag is a key-value pair
   helps manage, identify, search, and filter your resources by labelling them. Format:
   \"key\" : \"value\"  Restrictions:   Maximum 50 tags per resource   Each resource tag must
@@ -2068,16 +2166,8 @@ Updates the specified properties of a given geofence collection.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"Description"`: Updates the description for the geofence collection.
-- `"PricingPlan"`: Updates the pricing plan for the geofence collection. For more
-  information about each pricing plan option restrictions, see Amazon Location Service
-  pricing.
-- `"PricingPlanDataSource"`: Updates the data provider for the geofence collection.  A
-  required value for the following pricing plans: MobileAssetTracking| MobileAssetManagement
-  For more information about data providers and pricing plans, see the Amazon Location
-  Service product page.  This can only be updated when updating the PricingPlan in the same
-  request. Amazon Location Service uses PricingPlanDataSource to calculate billing for your
-  geofence collection. Your data won't be shared with the data provider, and will remain in
-  your AWS account and Region unless you move it.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
+- `"PricingPlanDataSource"`: This parameter is no longer used.
 """
 function update_geofence_collection(
     CollectionName; aws_config::AbstractAWSConfig=global_aws_config()
@@ -2115,8 +2205,7 @@ Updates the specified properties of a given map resource.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"Description"`: Updates the description for the map resource.
-- `"PricingPlan"`: Updates the pricing plan for the map resource. For more information
-  about each pricing plan option restrictions, see Amazon Location Service pricing.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
 """
 function update_map(MapName; aws_config::AbstractAWSConfig=global_aws_config())
     return location(
@@ -2151,9 +2240,7 @@ Updates the specified properties of a given place index resource.
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"DataSourceConfiguration"`: Updates the data storage option for the place index resource.
 - `"Description"`: Updates the description for the place index resource.
-- `"PricingPlan"`: Updates the pricing plan for the place index resource. For more
-  information about each pricing plan option restrictions, see Amazon Location Service
-  pricing.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
 """
 function update_place_index(IndexName; aws_config::AbstractAWSConfig=global_aws_config())
     return location(
@@ -2189,9 +2276,7 @@ Updates the specified properties for a given route calculator resource.
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"Description"`: Updates the description for the route calculator resource.
-- `"PricingPlan"`: Updates the pricing plan for the route calculator resource. For more
-  information about each pricing plan option restrictions, see Amazon Location Service
-  pricing.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
 """
 function update_route_calculator(
     CalculatorName; aws_config::AbstractAWSConfig=global_aws_config()
@@ -2245,15 +2330,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   collections, nor stored. This helps educe the effects of GPS noise when displaying device
   trajectories on a map, and can help control costs by reducing the number of geofence
   evaluations.
-- `"PricingPlan"`: Updates the pricing plan for the tracker resource. For more information
-  about each pricing plan option restrictions, see Amazon Location Service pricing.
-- `"PricingPlanDataSource"`: Updates the data provider for the tracker resource.  A
-  required value for the following pricing plans: MobileAssetTracking| MobileAssetManagement
-  For more information about data providers and pricing plans, see the Amazon Location
-  Service product page  This can only be updated when updating the PricingPlan in the same
-  request. Amazon Location Service uses PricingPlanDataSource to calculate billing for your
-  tracker resource. Your data won't be shared with the data provider, and will remain in your
-  AWS account and Region unless you move it.
+- `"PricingPlan"`: No longer used. If included, the only allowed value is RequestBasedUsage.
+- `"PricingPlanDataSource"`: This parameter is no longer used.
 """
 function update_tracker(TrackerName; aws_config::AbstractAWSConfig=global_aws_config())
     return location(

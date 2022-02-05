@@ -343,6 +343,15 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   formats:   KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\"    Amazon Resource Name
   (ARN) of a KMS Key:
   \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\"
+- `"ModelPolicy"`: The resource-based policy to attach to your custom document classifier
+  model. You can use this policy to allow another AWS account to import your custom model.
+  Provide your policy as a JSON body that you enter as a UTF-8 encoded string without line
+  breaks. To provide valid JSON, enclose the attribute names and values in double quotes. If
+  the JSON body is also enclosed in double quotes, then you must escape the double quotes
+  that are inside the policy:  \"{\"attribute\": \"value\", \"attribute\": [\"value\"]}\"  To
+  avoid escaping quotes, you can use single quotes to enclose the policy and double quotes to
+  enclose the JSON names and values:  '{\"attribute\": \"value\", \"attribute\":
+  [\"value\"]}'
 - `"OutputDataConfig"`: Enables the addition of output results configuration parameters for
   custom classifier jobs.
 - `"Tags"`: Tags to be associated with the document classifier being created. A tag is a
@@ -512,6 +521,15 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   formats   KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\"    Amazon Resource Name
   (ARN) of a KMS Key:
   \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\"
+- `"ModelPolicy"`: The JSON resource-based policy to attach to your custom entity
+  recognizer model. You can use this policy to allow another AWS account to import your
+  custom model. Provide your JSON as a UTF-8 encoded string without line breaks. To provide
+  valid JSON for your policy, enclose the attribute names and values in double quotes. If the
+  JSON body is also enclosed in double quotes, then you must escape the double quotes that
+  are inside the policy:  \"{\"attribute\": \"value\", \"attribute\": [\"value\"]}\"  To
+  avoid escaping quotes, you can use single quotes to enclose the policy and double quotes to
+  enclose the JSON names and values:  '{\"attribute\": \"value\", \"attribute\":
+  [\"value\"]}'
 - `"Tags"`: Tags to be associated with the entity recognizer being created. A tag is a
   key-value pair that adds as a metadata to a resource used by Amazon Comprehend. For
   example, a tag with \"Sales\" as the key might be added to a resource to indicate its use
@@ -694,6 +712,45 @@ function delete_entity_recognizer(
                 Dict{String,Any}("EntityRecognizerArn" => EntityRecognizerArn),
                 params,
             ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    delete_resource_policy(resource_arn)
+    delete_resource_policy(resource_arn, params::Dict{String,<:Any})
+
+Deletes a resource-based policy that is attached to a custom model.
+
+# Arguments
+- `resource_arn`: The Amazon Resource Name (ARN) of the custom model version that has the
+  policy to delete.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"PolicyRevisionId"`: The revision ID of the policy to delete.
+"""
+function delete_resource_policy(
+    ResourceArn; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return comprehend(
+        "DeleteResourcePolicy",
+        Dict{String,Any}("ResourceArn" => ResourceArn);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function delete_resource_policy(
+    ResourceArn,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return comprehend(
+        "DeleteResourcePolicy",
+        Dict{String,Any}(
+            mergewith(_merge, Dict{String,Any}("ResourceArn" => ResourceArn), params)
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -1012,6 +1069,42 @@ function describe_pii_entities_detection_job(
 end
 
 """
+    describe_resource_policy(resource_arn)
+    describe_resource_policy(resource_arn, params::Dict{String,<:Any})
+
+Gets the details of a resource-based policy that is attached to a custom model, including
+the JSON body of the policy.
+
+# Arguments
+- `resource_arn`: The Amazon Resource Name (ARN) of the policy to describe.
+
+"""
+function describe_resource_policy(
+    ResourceArn; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return comprehend(
+        "DescribeResourcePolicy",
+        Dict{String,Any}("ResourceArn" => ResourceArn);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function describe_resource_policy(
+    ResourceArn,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return comprehend(
+        "DescribeResourcePolicy",
+        Dict{String,Any}(
+            mergewith(_merge, Dict{String,Any}("ResourceArn" => ResourceArn), params)
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     describe_sentiment_detection_job(job_id)
     describe_sentiment_detection_job(job_id, params::Dict{String,<:Any})
 
@@ -1319,6 +1412,63 @@ function detect_syntax(
                 Dict{String,Any}("LanguageCode" => LanguageCode, "Text" => Text),
                 params,
             ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    import_model(source_model_arn)
+    import_model(source_model_arn, params::Dict{String,<:Any})
+
+Creates a new custom model that replicates a source custom model that you import. The
+source model can be in your AWS account or another one. If the source model is in another
+AWS account, then it must have a resource-based policy that authorizes you to import it.
+The source model must be in the same AWS region that you're using when you import. You
+can't import a model that's in a different region.
+
+# Arguments
+- `source_model_arn`: The Amazon Resource Name (ARN) of the custom model to import.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"DataAccessRoleArn"`: The Amazon Resource Name (ARN) of the AWS Identity and Management
+  (IAM) role that allows Amazon Comprehend to use Amazon Key Management Service (KMS) to
+  encrypt or decrypt the custom model.
+- `"ModelKmsKeyId"`: ID for the AWS Key Management Service (KMS) key that Amazon Comprehend
+  uses to encrypt trained custom models. The ModelKmsKeyId can be either of the following
+  formats:   KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\"    Amazon Resource Name
+  (ARN) of a KMS Key:
+  \"arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab\"
+- `"ModelName"`: The name to assign to the custom model that is created in Amazon
+  Comprehend by this import.
+- `"Tags"`: Tags to be associated with the custom model that is created by this import. A
+  tag is a key-value pair that adds as a metadata to a resource used by Amazon Comprehend.
+  For example, a tag with \"Sales\" as the key might be added to a resource to indicate its
+  use by the sales department.
+- `"VersionName"`: The version name given to the custom model that is created by this
+  import. Version names can have a maximum of 256 characters. Alphanumeric characters,
+  hyphens (-) and underscores (_) are allowed. The version name must be unique among all
+  models with the same classifier name in the account/AWS Region.
+"""
+function import_model(SourceModelArn; aws_config::AbstractAWSConfig=global_aws_config())
+    return comprehend(
+        "ImportModel",
+        Dict{String,Any}("SourceModelArn" => SourceModelArn);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function import_model(
+    SourceModelArn,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return comprehend(
+        "ImportModel",
+        Dict{String,Any}(
+            mergewith(_merge, Dict{String,Any}("SourceModelArn" => SourceModelArn), params)
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -1764,6 +1914,63 @@ function list_topics_detection_jobs(
     return comprehend(
         "ListTopicsDetectionJobs",
         params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    put_resource_policy(resource_arn, resource_policy)
+    put_resource_policy(resource_arn, resource_policy, params::Dict{String,<:Any})
+
+Attaches a resource-based policy to a custom model. You can use this policy to authorize an
+entity in another AWS account to import the custom model, which replicates it in Amazon
+Comprehend in their account.
+
+# Arguments
+- `resource_arn`: The Amazon Resource Name (ARN) of the custom model to attach the policy
+  to.
+- `resource_policy`: The JSON resource-based policy to attach to your custom model. Provide
+  your JSON as a UTF-8 encoded string without line breaks. To provide valid JSON for your
+  policy, enclose the attribute names and values in double quotes. If the JSON body is also
+  enclosed in double quotes, then you must escape the double quotes that are inside the
+  policy:  \"{\"attribute\": \"value\", \"attribute\": [\"value\"]}\"  To avoid escaping
+  quotes, you can use single quotes to enclose the policy and double quotes to enclose the
+  JSON names and values:  '{\"attribute\": \"value\", \"attribute\": [\"value\"]}'
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"PolicyRevisionId"`: The revision ID that Amazon Comprehend assigned to the policy that
+  you are updating. If you are creating a new policy that has no prior version, don't use
+  this parameter. Amazon Comprehend creates the revision ID for you.
+"""
+function put_resource_policy(
+    ResourceArn, ResourcePolicy; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return comprehend(
+        "PutResourcePolicy",
+        Dict{String,Any}("ResourceArn" => ResourceArn, "ResourcePolicy" => ResourcePolicy);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function put_resource_policy(
+    ResourceArn,
+    ResourcePolicy,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return comprehend(
+        "PutResourcePolicy",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}(
+                    "ResourceArn" => ResourceArn, "ResourcePolicy" => ResourcePolicy
+                ),
+                params,
+            ),
+        );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )

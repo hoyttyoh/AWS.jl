@@ -23,6 +23,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"autoBranchCreationPatterns"`:  The automated branch creation glob patterns for an
   Amplify app.
 - `"basicAuthCredentials"`:  The credentials for basic authorization for an Amplify app.
+  You must base64-encode the authorization credentials and provide them in the format
+  user:password.
 - `"buildSpec"`:  The build specification (build spec) for an Amplify app.
 - `"customHeaders"`: The custom HTTP headers for an Amplify app.
 - `"customRules"`:  The custom rewrite and redirect rules for an Amplify app.
@@ -123,7 +125,8 @@ end
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"backendEnvironmentArn"`:  The Amazon Resource Name (ARN) for a backend environment that
   is part of an Amplify app.
-- `"basicAuthCredentials"`:  The basic authorization credentials for the branch.
+- `"basicAuthCredentials"`:  The basic authorization credentials for the branch. You must
+  base64-encode the authorization credentials and provide them in the format user:password.
 - `"buildSpec"`:  The build specification (build spec) for the branch.
 - `"description"`:  The description for the branch.
 - `"displayName"`:  The display name for a branch. This is used as the default domain
@@ -1302,7 +1305,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   app.
 - `"autoBranchCreationPatterns"`:  Describes the automated branch creation glob patterns
   for an Amplify app.
-- `"basicAuthCredentials"`:  The basic authorization credentials for an Amplify app.
+- `"basicAuthCredentials"`:  The basic authorization credentials for an Amplify app. You
+  must base64-encode the authorization credentials and provide them in the format
+  user:password.
 - `"buildSpec"`:  The build specification (build spec) for an Amplify app.
 - `"customHeaders"`: The custom HTTP headers for an Amplify app.
 - `"customRules"`:  The custom redirect and rewrite rules for an Amplify app.
@@ -1353,7 +1358,8 @@ end
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"backendEnvironmentArn"`:  The Amazon Resource Name (ARN) for a backend environment that
   is part of an Amplify app.
-- `"basicAuthCredentials"`:  The basic authorization credentials for the branch.
+- `"basicAuthCredentials"`:  The basic authorization credentials for the branch. You must
+  base64-encode the authorization credentials and provide them in the format user:password.
 - `"buildSpec"`:  The build specification (build spec) for the branch.
 - `"description"`:  The description for the branch.
 - `"displayName"`:  The display name for a branch. This is used as the default domain
